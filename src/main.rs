@@ -21,7 +21,7 @@ fn get_string() -> &'static str {
 fn ui_example_system(mut contexts: EguiContexts) -> Result {
     egui::Window::new("Hello").show(contexts.ctx_mut()?, |ui| {
         ui.label("world");
-        ui.label("Eoghan Adrian Stanley say hi");
+        ui.label("Eoghan Adrian Stanley say hi v5");
         ui.label(get_string());
         ui.allocate_space(ui.available_size());
     });
