@@ -23,6 +23,7 @@ fn ui_example_system(mut contexts: EguiContexts) -> Result {
         ui.label("world");
         ui.label("Eoghan Adrian Stanley say hi");
         ui.label(get_string());
+        ui.allocate_space(ui.available_size());
     });
 
     Ok(())
