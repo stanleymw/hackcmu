@@ -51,6 +51,7 @@ fn setup_camera_system(mut commands: Commands) {
     commands.spawn((
         CodeBuffer {
             code: include_str!("../res/Level1Init.wat").to_owned(),
+            reference: include_str!("../res/Level1.md").to_owned(),
         },
         AvaibleCallbacks {
             callbacks: [WasmCallback::Move].into(),
@@ -60,39 +61,45 @@ fn setup_camera_system(mut commands: Commands) {
 
     commands.spawn((
         CodeBuffer {
-            code: include_str!("../res/SolCode2.wat").to_owned(),
+            code: include_str!("../res/Level2Init.wat").to_owned(),
+            reference: include_str!("../res/Level2.md").to_owned(),
         },
         LevelIndex(1),
     ));
 
     commands.spawn((
         CodeBuffer {
-            code: include_str!("../res/SolCode3.wat").to_owned(),
+            code: include_str!("../res/Level3Init.wat").to_owned(),
+            reference: include_str!("../res/Level3.md").to_owned(),
         },
         LevelIndex(2),
     ));
 
     commands.spawn((
         CodeBuffer {
-            code: include_str!("../res/SolCode4.wat").to_owned(),
+            code: include_str!("../res/Level4Init.wat").to_owned(),
+            reference: include_str!("../res/Level4.md").to_owned(),
         },
         LevelIndex(3),
     ));
     commands.spawn((
         CodeBuffer {
-            code: include_str!("../res/SolCode5.wat").to_owned(),
+            code: include_str!("../res/Level5Init.wat").to_owned(),
+            reference: include_str!("../res/Level5.md").to_owned(),
         },
         LevelIndex(4),
     ));
     commands.spawn((
         CodeBuffer {
-            code: include_str!("../res/SolCode6.wat").to_owned(),
+            code: include_str!("../res/Level6Init.wat").to_owned(),
+            reference: include_str!("../res/Level6.md").to_owned(),
         },
         LevelIndex(5),
     ));
     commands.spawn((
         CodeBuffer {
-            code: include_str!("../res/SolCode7.wat").to_owned(),
+            code: include_str!("../res/Level7Init.wat").to_owned(),
+            reference: include_str!("../res/Level7.md").to_owned(),
         },
         LevelIndex(6),
     ));
