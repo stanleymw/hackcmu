@@ -4,17 +4,21 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+anyhow = "1.0.99"
 bevy = { version = "0.16.1", features = ["dynamic_linking"] }
 bevy_egui = "0.36.0"
+crossbeam-channel = "0.5.15"
 egui_extras = {version = "0.32.3", features = ["syntect"]}
 syntect = { version = "5.2.0", features = [ "default-fancy" ], default-features = false }
-wasmtime = {version = "36.0.2", features = [
-  "async",
+# wasmtime = {version = "36.0.2", features = [
+wasmtime = { git = 'https://github.com/Eoghanmc22/wasmtime.git', features = [
+  # "async",
   "runtime",
   "gc",
   "component-model",
   "pulley",
   "wat",
+  "winch",
 
   # Default features that do work on wasm
   # "async",
@@ -39,6 +43,9 @@ wasmtime = {version = "36.0.2", features = [
   # "stack-switching",
   # "std",
 ], default-features = false }
+
+[target.'cfg(unix)'.dependencies]
+wasmtime = { git = 'https://github.com/Eoghanmc22/wasmtime.git' }
 
 [profile.web]
 inherits = "release"
