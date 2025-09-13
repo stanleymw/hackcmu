@@ -1,3 +1,7 @@
+// Relevent Docs
+// - https://docs.wasmtime.dev/examples-interrupting-wasm.html
+//
+
 use bevy::{platform::collections::HashSet, prelude::*};
 use wasmtime::{Module, Store};
 
@@ -21,7 +25,7 @@ pub struct CompiledCode {
 }
 
 pub struct WasmContext {
-    callbacks: HashSet<WasmCallbacks>,
+    // world_connands:
 }
 
 pub enum WasmCallbacks {
