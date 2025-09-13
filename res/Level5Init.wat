@@ -7,6 +7,10 @@
     i32.add
   )
 
+  (func $move_n_times (param $squares i32)
+    ;; IMPLEMENT THIS!
+  )
+
   (func $main 
     i32.const 5   ;; will push 5 on the stack
     call $increment   ;; will consume the value on the stack and call $IncrementAndPrint

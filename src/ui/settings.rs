@@ -29,7 +29,7 @@ pub fn settings_ui(
     egui::Window::new("Settings")
         .open(&mut settings_open.0)
         .show(contexts.ctx_mut()?, |ui| {
-            let res = ui.add(Slider::new(&mut *scale_factor, 1.0..=2.0).text("UI Scale"));
+            let res = ui.add(Slider::new(&mut *scale_factor, 0.5..=2.0).text("UI Scale"));
             if !res.dragged() {
                 egui_settings.scale_factor = *scale_factor;
             }

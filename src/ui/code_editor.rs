@@ -55,81 +55,84 @@ pub fn code_editor(
     egui::Window::new(format!("Level {}", current_level.index))
         .id("Level UI".into())
         .show(contexts.ctx_mut()?, |ui| {
-            ui.horizontal(|ui| {
-                ui.checkbox(&mut settings_window_open.0, "Settings");
-                ui.checkbox(&mut reference_window_open.0, "Reference");
-                ui.checkbox(&mut inspector_window_open.0, "Debugger");
-            });
+            egui::ScrollArea::vertical()
+                .min_scrolled_height(512.0)
+                .show(ui, |ui| {
+                    ui.horizontal(|ui| {
+                        ui.checkbox(&mut settings_window_open.0, "Settings");
+                        ui.checkbox(&mut reference_window_open.0, "Reference");
+                        ui.checkbox(&mut inspector_window_open.0, "Debugger");
+                    });
 
-            ui.label(RichText::new(&last_compile_error.error).font(FontId::monospace(16.0)));
+                    ui.label(
+                        RichText::new(&last_compile_error.error).font(FontId::monospace(16.0)),
+                    );
 
-            if ui.button("Previous Level").clicked() {
-                commands.insert_resource(CurrentLevel {
-                    index: current_level.index.wrapping_sub(1),
-                });
-                last_compile_error.error = String::new();
-            }
+                    if ui.button("Previous Level").clicked() {
+                        commands.insert_resource(CurrentLevel {
+                            index: current_level.index.wrapping_sub(1),
+                        });
+                        last_compile_error.error = String::new();
+                    }
 
-            if ui.button("Next Level").clicked() {
-                // commands.insert_resource(CurrentLevel {
-                //     index: current_level.index.wrapping_add(1),
-                // });
-                has_won.0 = true;
-                last_compile_error.error = String::new();
-            }
+                    if ui.button("Next Level").clicked() {
+                        // commands.insert_resource(CurrentLevel {
+                        //     index: current_level.index.wrapping_add(1),
+                        // });
+                        has_won.0 = true;
+                        last_compile_error.error = String::new();
+                    }
 
-            ui.horizontal(|ui| {
-                if ui.button("▶ Play").clicked() {
-                    code_actions.write(CodeAction::CompileAndRun);
-                }
-                if ui
-                    .button(if *game_state == GameState::Run {
-                        "⏸ Pause"
-                    } else {
-                        "▶ Resume"
-                    })
-                    .clicked()
-                {
-                    code_actions.write(CodeAction::Pause);
-                }
-                if ui.button("↩ Reset").clicked() {
-                    code_actions.write(CodeAction::Stop);
-                }
-            });
+                    ui.horizontal(|ui| {
+                        if ui.button("▶ Play").clicked() {
+                            code_actions.write(CodeAction::CompileAndRun);
+                        }
+                        if ui
+                            .button(if *game_state == GameState::Run {
+                                "⏸ Pause"
+                            } else {
+                                "▶ Resume"
+                            })
+                            .clicked()
+                        {
+                            code_actions.write(CodeAction::Pause);
+                        }
+                        if ui.button("↩ Reset").clicked() {
+                            code_actions.write(CodeAction::Stop);
+                        }
+                    });
 
-            for (mut buf, idx) in level_query.iter_mut() {
-                if idx.0 != current_level.index {
-                    continue;
-                }
+                    for (mut buf, idx) in level_query.iter_mut() {
+                        if idx.0 != current_level.index {
+                            continue;
+                        }
 
-                if ui.button("Show Solution").clicked() {
-                    buf.code = buf.solution.clone();
-                }
+                        if ui.button("Show Solution").clicked() {
+                            buf.code = buf.solution.clone();
+                        }
 
-                let mut layouter = |ui: &egui::Ui, buf: &dyn egui::TextBuffer, wrap_width: f32| {
-                    let mut layout_job: egui::text::LayoutJob =
-                        egui_extras::syntax_highlighting::highlight_with(
-                            ui.ctx(),
-                            &stable_settings,
-                            &editor_theme.0,
-                            buf.as_str(),
-                            "wast",
-                            &syntect_settings.settings,
-                        );
-                    layout_job.wrap.max_width = wrap_width;
-                    ui.fonts(|f| f.layout_job(layout_job))
-                };
-                egui::ScrollArea::vertical()
-                    .min_scrolled_height(512.0)
-                    .show(ui, |ui| {
+                        let mut layouter =
+                            |ui: &egui::Ui, buf: &dyn egui::TextBuffer, wrap_width: f32| {
+                                let mut layout_job: egui::text::LayoutJob =
+                                    egui_extras::syntax_highlighting::highlight_with(
+                                        ui.ctx(),
+                                        &stable_settings,
+                                        &editor_theme.0,
+                                        buf.as_str(),
+                                        "wast",
+                                        &syntect_settings.settings,
+                                    );
+                                layout_job.wrap.max_width = wrap_width;
+                                ui.fonts(|f| f.layout_job(layout_job))
+                            };
                         ui.add(
                             TextEdit::multiline(&mut buf.code)
                                 .code_editor()
                                 .desired_width(f32::INFINITY)
                                 .layouter(&mut layouter), // .min_size(Vec2 { x: 64.0, y: 480.0 }),
                         );
-                    });
-            }
+                    }
+                });
         });
 
     Ok(())
