@@ -5,6 +5,7 @@ use bevy_egui::{
     EguiContexts,
     egui::{self, FontId, RichText, Style, TextEdit, Vec2},
 };
+use bevy_panorbit_camera::PanOrbitCamera;
 use egui_extras::syntax_highlighting::CodeTheme;
 
 use crate::{
@@ -47,12 +48,13 @@ pub fn code_editor(
     mut has_won: ResMut<HasWon>,
     mut compile_error_reader: EventReader<WasmCompileError>,
     mut last_compile_error: Local<(WasmCompileError)>,
+    mut cameras: Query<&mut PanOrbitCamera>,
 ) -> Result {
     for compileError in compile_error_reader.read() {
         *last_compile_error = compileError.clone();
     }
 
-    egui::Window::new(format!("Level {}", current_level.index))
+    let response = egui::Window::new(format!("Level {}", current_level.index))
         .id("Level UI".into())
         .show(contexts.ctx_mut()?, |ui| {
             egui::ScrollArea::vertical()
@@ -134,6 +136,16 @@ pub fn code_editor(
                     }
                 });
         });
+
+    let enable_cameras = if let Some(response) = response {
+        !response.response.contains_pointer()
+    } else {
+        true
+    };
+
+    cameras.iter_mut().for_each(|mut camera| {
+        camera.enabled = enable_cameras;
+    });
 
     Ok(())
 }
