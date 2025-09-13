@@ -6,7 +6,12 @@ pub mod wasm;
 
 fn main() {
     App::new()
-        .add_plugins((DefaultPlugins, ui::UiPlugin, game::GamePlugin))
+        .add_plugins((
+            DefaultPlugins,
+            ui::UiPlugin,
+            game::GamePlugin,
+            wasm::WasmPlugin,
+        ))
         .insert_resource(CurrentLevel { index: 0 })
         .add_systems(Update, update_is_current_level)
         .run();

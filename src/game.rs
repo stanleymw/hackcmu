@@ -54,7 +54,7 @@ fn read_position_deltas(
 // TODO: Implement
 fn handle_reset(mut events: EventReader<GameResetEvent>) {
     for event in events.read() {
-        todo!("Game reset logic");
+        // todo!("Game reset logic");
     }
 }
 

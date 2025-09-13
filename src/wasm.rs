@@ -106,7 +106,7 @@ fn handle_code_action(
         (
             Entity,
             &CodeBuffer,
-            &AvaibleCallbacks,
+            Option<&AvaibleCallbacks>,
             Option<&WasmChannels>,
         ),
         With<IsCurrentLevel>,
@@ -124,7 +124,11 @@ fn handle_code_action(
                     let _ = channels.to_wasm.unbounded_send(WasmEventsIn::Abort);
                 }
 
-                let (mut compiled, channels) = compile_code(&buf.code, callbacks, &engine.0)?;
+                let (mut compiled, channels) = compile_code(
+                    &buf.code,
+                    callbacks.unwrap_or(&Default::default()),
+                    &engine.0,
+                )?;
 
                 let thread_pool = AsyncComputeTaskPool::get();
                 let task = thread_pool.spawn(async move { compiled.instantiate().await });
@@ -230,7 +234,7 @@ pub struct CompiledCode {
     instance: Option<Instance>,
 }
 
-#[derive(Component)]
+#[derive(Component, Default)]
 pub struct AvaibleCallbacks {
     callbacks: HashSet<WasmCallback>,
 }
@@ -340,6 +344,8 @@ pub fn compile_code(
     callbacks: &AvaibleCallbacks,
     engine: &Engine,
 ) -> Result<(CompiledCode, WasmChannels)> {
+    println!("Compiling code");
+
     let module = Module::new(&engine, code)?;
 
     let (wasm_ctx, bevy_ctx) = create_context();
@@ -371,6 +377,8 @@ pub fn compile_code(
     // Note, This line starts running the code
     // let instance = Instance::new(&mut store, &module, &imports)?;
 
+    println!("Compile Successful");
+
     Ok((
         CompiledCode {
             module,
@@ -394,9 +402,13 @@ impl CompiledCode {
             ..
         } = self;
 
+        println!("Running Code");
+
         *instance = Some(Instance::new_async(store, module, &imports).await?);
 
         let _ = self.to_bevy.unbounded_send(WasmEventsOut::IsFinished);
+
+        println!("Code Executed");
 
         Ok(())
     }
