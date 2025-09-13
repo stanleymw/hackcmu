@@ -62,12 +62,14 @@ pub fn code_editor(
                 commands.insert_resource(CurrentLevel {
                     index: current_level.index.wrapping_add(1),
                 });
+                last_compile_error.error = String::new();
             }
 
             if ui.button("Previous Level").clicked() {
                 commands.insert_resource(CurrentLevel {
                     index: current_level.index.wrapping_sub(1),
                 });
+                last_compile_error.error = String::new();
             }
 
             ui.horizontal(|ui| {
