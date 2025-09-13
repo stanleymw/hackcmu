@@ -1,16 +1,16 @@
 (module
-    ;;(import func move)   @@@@@@@@@@@@@@FIX
+    (import "builtin" "move" (func $move))
 
     (func $move_fn
-        call move
+        call $move
     )
 
-    (func moveNTimes (param $n i32)
+    (func $moveNTimes (param $n i32)
         (local $i i32)  ;; the looping variable
         (local.set $i (i32.const 0))  ;; initialize i to 0
 
         (loop $_loop
-            call move_fn
+            call $move_fn
 
             ;; Will add one to i
             local.get $i
@@ -20,13 +20,13 @@
 
             (local.get $n)   ;; load parameter
             i32.lt_s  
-            br_if $my_loop ;; if the statement is true then the execution will return to the start of the loop
+            br_if $_loop ;; if the statement is true then the execution will return to the start of the loop
         )
     )
 
     (func $main
         i32.const 255
-        moveNTimes  ;; will consume the value 255 from the stack
+        $moveNTimes  ;; will consume the value 255 from the stack
     )
     
     (start $main)

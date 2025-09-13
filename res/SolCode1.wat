@@ -1,13 +1,13 @@
 (module
-  ;;(import func move)   ;; Import the move function @@@@@@@@@FIX@@@@@@@@@@@
+  (import "builtin" "move" (func $move))
 
-  (func $moveFn
-    call move
-    call move
-    call move
-    call move
+  (func $move_fn
+    call $move
+    call $move
+    call $move
+    call $move
   )
 
   ;; Run the function $moveFn by name
-  (start $moveFn)
+  (start $move_fn)
 )

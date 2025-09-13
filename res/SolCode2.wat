@@ -1,14 +1,14 @@
 (module
-  ;;(import func move)   @@@@@@@@@@@@@@FIX
-  ;;(import func turn_right)   @@@@@@@@@@@@@@FIX
+  (import "builtin" "move" (func $move))
+  (import "builtin" "turn_right" (func $turnRight))
 
   (func $move_fn
-    call move
-    call move
+    call $move
+    call $move
   )
 
   (func $turnRight_fn
-    call turn_Right
+    call turnRight
   )
  
   (start $move_fn)

@@ -1,4 +1,4 @@
-## Level 6:
+## Level 5:
 
 The Great Invisible Monster of Wasm painted over part of the Robot Master's scroll, and an important number is hidden. 
 

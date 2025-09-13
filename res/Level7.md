@@ -1,4 +1,4 @@
-## Level 7:
+## Level 6:
 
 Congratulations Wasm Master! You have reached the final level! To celebrate, the robot would like to move in a giant spiral!
 

@@ -1,6 +1,6 @@
-## Level 2:
+## Level 1:
 
-Congratulations on passing level 1! Now the robot must also turn right to be able to navigate a more complex maze, using the turnRight(function).
+Congratulations on passing level 0! Now the robot must also turn right to be able to navigate a more complex maze, using the turnRight(function).
 
 In this case, both functions must be imported before they can be used. 
 

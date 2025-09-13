@@ -1,4 +1,4 @@
-## Level 3: 
+## Level 2: 
 
 Congratulations advancing hacker! I am the Great Invisible Monster of Wasm and will destroy the robot if you do not have it pass through the waypoint. 
 Save your friend by telling it how to reach the goal while still passing through the waypoint.

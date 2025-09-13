@@ -6,5 +6,5 @@
   )
 
   ;; Run the function $moveFn by name
-  (start $moveFn)
+  (start $move_fn)
 )

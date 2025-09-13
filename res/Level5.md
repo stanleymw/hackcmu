@@ -1,4 +1,4 @@
-## Level 5: 
+## Level 4: 
 
 Now it is time for you to make your first Wasm function that utilizes input parameters! 
 
