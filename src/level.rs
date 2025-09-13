@@ -85,6 +85,11 @@ pub fn create_level_entitites(mut commands: Commands, asset_server: Res<AssetSer
         },
         LevelIndex(3),
         LevelTexture(asset_server.load("Map3.png")),
+        WinPosition(GamePosition {
+            x: 63,
+            y: 0,
+            rot: GameDirection::North,
+        }),
     ));
     commands.spawn((
         Name::new("Level 4"),
@@ -124,5 +129,10 @@ pub fn create_level_entitites(mut commands: Commands, asset_server: Res<AssetSer
         },
         LevelIndex(6),
         LevelTexture(asset_server.load("Map6.png")),
+        WinPosition(GamePosition {
+            x: 4,
+            y: -4,
+            rot: GameDirection::East,
+        }),
     ));
 }
