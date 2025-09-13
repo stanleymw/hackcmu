@@ -7,6 +7,7 @@ use egui_extras::syntax_highlighting::CodeTheme;
 
 use crate::{
     CurrentLevel, HasWon, LevelIndex,
+    game::GameState,
     ui::{reference::ReferenceOpen, settings::SettingsOpen},
     wasm::{CodeAction, CodeBuffer, WasmCompileError},
 };
@@ -34,6 +35,7 @@ pub fn code_editor(
     current_level: Res<CurrentLevel>,
     syntect_settings: Res<SyntectSetting>,
     editor_theme: Res<EditorTheme>,
+    game_state: Res<GameState>,
     mut commands: Commands,
     mut level_query: Query<(&mut CodeBuffer, &LevelIndex)>,
     mut settings_window_open: ResMut<SettingsOpen>,
@@ -57,6 +59,13 @@ pub fn code_editor(
 
             ui.label(RichText::new(&last_compile_error.error).font(FontId::monospace(16.0)));
 
+            if ui.button("Previous Level").clicked() {
+                commands.insert_resource(CurrentLevel {
+                    index: current_level.index.wrapping_sub(1),
+                });
+                last_compile_error.error = String::new();
+            }
+
             if ui.button("Next Level").clicked() {
                 // commands.insert_resource(CurrentLevel {
                 //     index: current_level.index.wrapping_add(1),
@@ -65,18 +74,18 @@ pub fn code_editor(
                 last_compile_error.error = String::new();
             }
 
-            // if ui.button("Previous Level").clicked() {
-            //     commands.insert_resource(CurrentLevel {
-            //         index: current_level.index.wrapping_sub(1),
-            //     });
-            //     last_compile_error.error = String::new();
-            // }
-
             ui.horizontal(|ui| {
                 if ui.button("▶ Play").clicked() {
                     code_actions.write(CodeAction::CompileAndRun);
                 }
-                if ui.button("⏸ Pause").clicked() {
+                if ui
+                    .button(if *game_state == GameState::Run {
+                        "⏸ Pause"
+                    } else {
+                        "▶ Resume"
+                    })
+                    .clicked()
+                {
                     code_actions.write(CodeAction::Pause);
                 }
                 if ui.button("↩ Reset").clicked() {
