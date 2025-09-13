@@ -29,11 +29,12 @@
             buildInputs =
               [
                 # Rust dependencies
-                (rust-bin.stable.latest.default.override { extensions = [ "rust-src" ]; })
+                (rust-bin.stable.latest.default.override {
+                  extensions = [ "rust-src" ];
+                  targets = [ "wasm32-unknown-unknown" ];
+                })
                 pkg-config
-              ]
-              ++ lib.optionals (lib.strings.hasInfix "linux" system) [
-                # for Linux
+
                 # Audio (Linux only)
                 alsa-lib
                 # Cross Platform 3D Graphics API
@@ -48,6 +49,7 @@
                 xorg.libXrandr
                 libxkbcommon
                 mold
+                trunk
               ];
             RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
             LD_LIBRARY_PATH = lib.makeLibraryPath [
