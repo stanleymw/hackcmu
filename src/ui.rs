@@ -1,18 +1,31 @@
-use bevy::prelude::*;
+use bevy::{ecs::system::command::insert_resource, prelude::*, text::cosmic_text::Editor};
 use bevy_egui::{
-    EguiContextSettings, EguiContexts, EguiPlugin, EguiPrimaryContextPass,
-    egui::{self, Slider},
+    egui::{self, Slider, Style, TextEdit}, EguiContextSettings, EguiContexts, EguiPlugin, EguiPrimaryContextPass
 };
+use egui_extras::syntax_highlighting::{CodeTheme, SyntectSettings};
+use syntect::parsing::SyntaxDefinition;
 
 use crate::{CurrentLevel, LevelIndex, wasm::CodeBuffer};
+
 
 pub struct UiPlugin;
 
 impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
+        let mut builder = syntect::parsing::SyntaxSetBuilder::new();
+        let syntax_def = SyntaxDefinition::load_from_str(include_str!("../res/wast.sublime-syntax"), true, None).unwrap();
+        builder.add(syntax_def);
+        let ss = builder.build();
+
+        let mut syntect_settings = SyntectSettings::default();
+        syntect_settings.ps = ss;
+
         app.add_plugins(EguiPlugin::default())
             .add_systems(Startup, setup_camera_system)
-            .add_systems(EguiPrimaryContextPass, (ui_example_system, settings_ui));
+            .add_systems(EguiPrimaryContextPass, (ui_example_system, settings_ui))
+            .insert_resource(SyntectSetting{
+                settings: syntect_settings,
+            });
     }
 }
 
@@ -40,9 +53,16 @@ fn settings_ui(
     Ok(())
 }
 
+#[derive(Resource)]
+struct SyntectSetting {
+    settings: egui_extras::syntax_highlighting::SyntectSettings,
+}
+
 fn ui_example_system(
+    stable_settings: Local<(Style, CodeTheme)>,
     mut contexts: EguiContexts,
     current_level: Res<CurrentLevel>,
+    syntect_settings: Res<SyntectSetting>,
     mut commands: Commands,
     mut level_query: Query<(&mut CodeBuffer, &LevelIndex)>,
 ) -> Result {
@@ -66,7 +86,12 @@ fn ui_example_system(
                     continue;
                 }
 
-                ui.code_editor(&mut buf.code);
+                let mut layouter = |ui: &egui::Ui, buf: &dyn egui::TextBuffer, wrap_width: f32| {
+                    let mut layout_job: egui::text::LayoutJob = egui_extras::syntax_highlighting::highlight_with(ui.ctx(), &stable_settings.0, &stable_settings.1, buf.as_str(), "wast", &syntect_settings.settings);
+                    layout_job.wrap.max_width = wrap_width;
+                    ui.fonts(|f| f.layout_job(layout_job))
+                };
+                ui.add(TextEdit::multiline(&mut buf.code).code_editor().layouter(&mut layouter));
             }
 
             ui.allocate_space(ui.available_size());
