@@ -1,11 +1,18 @@
-use bevy::ecs::{name::Name, system::Commands};
+use bevy::{
+    asset::AssetServer,
+    ecs::{
+        name::Name,
+        system::{Commands, Res},
+    },
+};
 
 use crate::{
     LevelIndex,
+    render3d::LevelTexture,
     wasm::{AvaibleCallbacks, CodeBuffer, WasmCallback},
 };
 
-pub fn create_level_entitites(mut commands: Commands) {
+pub fn create_level_entitites(mut commands: Commands, asset_server: Res<AssetServer>) {
     // commands.spawn(Camera2d);
 
     commands.spawn((
@@ -18,6 +25,7 @@ pub fn create_level_entitites(mut commands: Commands) {
             callbacks: [WasmCallback::Move].into(),
         },
         LevelIndex(0),
+        LevelTexture(asset_server.load("Map0.png")),
     ));
 
     commands.spawn((
@@ -30,6 +38,7 @@ pub fn create_level_entitites(mut commands: Commands) {
             callbacks: [WasmCallback::Move, WasmCallback::TurnRight].into(),
         },
         LevelIndex(1),
+        LevelTexture(asset_server.load("Map1.png")),
     ));
 
     commands.spawn((
@@ -42,6 +51,7 @@ pub fn create_level_entitites(mut commands: Commands) {
             callbacks: [WasmCallback::Move, WasmCallback::TurnRight].into(),
         },
         LevelIndex(2),
+        LevelTexture(asset_server.load("Map2.png")),
     ));
 
     commands.spawn((
@@ -54,6 +64,7 @@ pub fn create_level_entitites(mut commands: Commands) {
             callbacks: [WasmCallback::Move].into(),
         },
         LevelIndex(3),
+        LevelTexture(asset_server.load("Map3.png")),
     ));
     commands.spawn((
         Name::new("Level 4"),
@@ -65,6 +76,7 @@ pub fn create_level_entitites(mut commands: Commands) {
             callbacks: [WasmCallback::Move].into(),
         },
         LevelIndex(4),
+        LevelTexture(asset_server.load("Map4.png")),
     ));
     commands.spawn((
         Name::new("Level 5"),
@@ -76,6 +88,7 @@ pub fn create_level_entitites(mut commands: Commands) {
             callbacks: [WasmCallback::Move].into(),
         },
         LevelIndex(5),
+        LevelTexture(asset_server.load("Map5.png")),
     ));
     commands.spawn((
         Name::new("Level 6"),
@@ -87,5 +100,6 @@ pub fn create_level_entitites(mut commands: Commands) {
             callbacks: [WasmCallback::Move, WasmCallback::TurnRight].into(),
         },
         LevelIndex(6),
+        LevelTexture(asset_server.load("Map6.png")),
     ));
 }

@@ -1,16 +1,26 @@
 use bevy::{math::Affine2, prelude::*};
 use bevy_panorbit_camera::{PanOrbitCamera, PanOrbitCameraPlugin};
 
-use crate::game::{GamePosition, Robot};
+use crate::{
+    IsCurrentLevel,
+    game::{GamePosition, Robot},
+};
 
 pub struct Render3dPlugin;
 
 impl Plugin for Render3dPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup)
+            .add_systems(Update, swap_level_texture)
             .add_plugins(PanOrbitCameraPlugin);
     }
 }
+
+#[derive(Component)]
+pub struct LevelTexture(pub Handle<Image>);
+
+#[derive(Component)]
+pub struct FloowMarker;
 
 /// set up a simple 3D scene
 fn setup(
@@ -24,11 +34,13 @@ fn setup(
         // Level textures are 127*127, so half size is 63.5x63.5
         Mesh3d(meshes.add(Plane3d::new(Vec3::Y, vec2(63.5, 63.5)))),
         MeshMaterial3d(materials.add(StandardMaterial {
-            base_color_texture: Some(asset_server.load("temp.png")),
+            // base_color_texture: Some(asset_server.load("temp.png")),
             alpha_mode: AlphaMode::Blend,
             ..default()
         })),
-        Transform::from_translation(vec3(0.0, -0.5, 0.0)),
+        Transform::from_translation(vec3(0.0, -0.5, 0.0))
+            .with_rotation(Quat::from_rotation_y(-90.0f32.to_radians())),
+        FloowMarker,
     ));
     // cube
     commands
@@ -90,4 +102,20 @@ fn setup(
         Transform::from_xyz(-2.5, 4.5, 9.0).looking_at(Vec3::ZERO, Vec3::Y),
         PanOrbitCamera::default(),
     ));
+}
+
+fn swap_level_texture(
+    mut cmds: Commands,
+    floor: Single<Entity, With<FloowMarker>>,
+    query: Query<&LevelTexture, Added<IsCurrentLevel>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    for texture in query.iter() {
+        cmds.entity(*floor)
+            .insert(MeshMaterial3d(materials.add(StandardMaterial {
+                base_color_texture: Some(texture.0.clone()),
+                alpha_mode: AlphaMode::Blend,
+                ..default()
+            })));
+    }
 }
