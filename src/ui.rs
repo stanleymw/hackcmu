@@ -40,7 +40,6 @@ fn setup_camera_system(mut commands: Commands) {
         commands.spawn((
             CodeBuffer {
                 code: format!("This is the code for level {i}!").into(),
-                compiled: None,
             },
             LevelIndex(i),
         ));
