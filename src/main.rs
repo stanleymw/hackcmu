@@ -10,12 +10,12 @@ pub mod wasm;
 fn main() {
     App::new()
         .add_plugins((
-            DefaultPlugins,
+            DefaultPlugins.set(ImagePlugin::default_nearest()),
             ui::UiPlugin,
             game::GamePlugin,
             wasm::WasmPlugin,
             render3d::Render3dPlugin,
-            WorldInspectorPlugin::new(),
+            // WorldInspectorPlugin::new(),
         ))
         .insert_resource(CurrentLevel { index: 0 })
         .insert_resource(HasWon(false))

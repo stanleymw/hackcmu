@@ -27,7 +27,7 @@ pub fn create_level_entitites(mut commands: Commands) {
             reference: include_str!("../res/Level2.md").to_owned(),
         },
         AvaibleCallbacks {
-            callbacks: [WasmCallback::Move].into(),
+            callbacks: [WasmCallback::Move, WasmCallback::TurnRight].into(),
         },
         LevelIndex(1),
     ));

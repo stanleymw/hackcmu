@@ -8,6 +8,7 @@ anyhow = "1.0.99"
 bevy = { version = "0.16.1", features = ["dynamic_linking"] }
 bevy-inspector-egui = "0.33.1"
 bevy_egui = "0.36.0"
+bevy_panorbit_camera = "0.28.0"
 crossbeam-channel = "0.5.15"
 egui_commonmark = "0.21.1"
 egui_extras = {version = "0.32.3", features = ["syntect"]}

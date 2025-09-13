@@ -32,7 +32,7 @@ impl Plugin for WasmPlugin {
             .add_event::<CodeAction>()
             .insert_resource(EngineRes(engine))
             .insert_resource(ResumeTimerRes(Timer::new(
-                Duration::from_secs_f32(1.0),
+                Duration::from_secs_f32(0.5),
                 TimerMode::Repeating,
             )))
             .add_systems(
