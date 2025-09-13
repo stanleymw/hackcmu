@@ -2,6 +2,7 @@ use bevy::{ecs::query, prelude::*};
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
 pub mod game;
+pub mod level;
 pub mod render3d;
 pub mod ui;
 pub mod wasm;

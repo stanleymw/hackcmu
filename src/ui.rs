@@ -5,6 +5,7 @@ use syntect::parsing::SyntaxDefinition;
 
 use crate::{
     LevelIndex,
+    level::create_level_entitites,
     wasm::{AvaibleCallbacks, CodeBuffer, WasmCallback},
 };
 
@@ -27,7 +28,7 @@ impl Plugin for UiPlugin {
         syntect_settings.ps = ss;
 
         app.add_plugins(EguiPlugin::default())
-            .add_systems(Startup, setup_camera_system)
+            .add_systems(Startup, create_level_entitites)
             .add_systems(
                 EguiPrimaryContextPass,
                 (
@@ -43,82 +44,4 @@ impl Plugin for UiPlugin {
             .insert_resource(reference::ReferenceOpen(false))
             .insert_resource(code_editor::EditorTheme(CodeTheme::default()));
     }
-}
-
-fn setup_camera_system(mut commands: Commands) {
-    // commands.spawn(Camera2d);
-
-    commands.spawn((
-        CodeBuffer {
-            code: include_str!("../res/Level1Init.wat").to_owned(),
-            reference: include_str!("../res/Level1.md").to_owned(),
-        },
-        AvaibleCallbacks {
-            callbacks: [WasmCallback::Move].into(),
-        },
-        LevelIndex(0),
-    ));
-
-    commands.spawn((
-        CodeBuffer {
-            code: include_str!("../res/Level2Init.wat").to_owned(),
-            reference: include_str!("../res/Level2.md").to_owned(),
-        },
-        AvaibleCallbacks {
-            callbacks: [WasmCallback::Move].into(),
-        },
-        LevelIndex(1),
-    ));
-
-    commands.spawn((
-        CodeBuffer {
-            code: include_str!("../res/Level3Init.wat").to_owned(),
-            reference: include_str!("../res/Level3.md").to_owned(),
-        },
-        AvaibleCallbacks {
-            callbacks: [WasmCallback::Move, WasmCallback::TurnRight].into(),
-        },
-        LevelIndex(2),
-    ));
-
-    commands.spawn((
-        CodeBuffer {
-            code: include_str!("../res/Level4Init.wat").to_owned(),
-            reference: include_str!("../res/Level4.md").to_owned(),
-        },
-        AvaibleCallbacks {
-            callbacks: [WasmCallback::Move].into(),
-        },
-        LevelIndex(3),
-    ));
-    commands.spawn((
-        CodeBuffer {
-            code: include_str!("../res/Level5Init.wat").to_owned(),
-            reference: include_str!("../res/Level5.md").to_owned(),
-        },
-        AvaibleCallbacks {
-            callbacks: [WasmCallback::Move].into(),
-        },
-        LevelIndex(4),
-    ));
-    commands.spawn((
-        CodeBuffer {
-            code: include_str!("../res/Level6Init.wat").to_owned(),
-            reference: include_str!("../res/Level6.md").to_owned(),
-        },
-        AvaibleCallbacks {
-            callbacks: [WasmCallback::Move].into(),
-        },
-        LevelIndex(5),
-    ));
-    commands.spawn((
-        CodeBuffer {
-            code: include_str!("../res/Level7Init.wat").to_owned(),
-            reference: include_str!("../res/Level7.md").to_owned(),
-        },
-        AvaibleCallbacks {
-            callbacks: [WasmCallback::Move, WasmCallback::TurnRight].into(),
-        },
-        LevelIndex(6),
-    ));
 }
