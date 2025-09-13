@@ -51,7 +51,7 @@ Sample Code:
   (start $move_fn)
 )
 
-Result: This will make the robot move forward one square forward and then turn right. 
+Result: This will make the robot move forward one square forward.
 
 
 
@@ -169,7 +169,7 @@ Luckily, the Robot Master's recipe for determining this number is still availabl
 The readable part of the scroll reads: 
 
 @@@@@@@@@@@@ToDo: italic-text
-"There is a variable equal to 70. There is a second variable initially equal to six times the first one. The robot must travel the product of the two variables minus the second variable."  
+"There is a variable equal to 20. There is a second variable initially equal to four times the first one. The robot must travel the product of the two variables minus the second variable."  
 
 It is important to keep in mind that Wasm uses a stack structure for variables and function calls. 
 
@@ -218,7 +218,6 @@ this fashion until it forward just one square.
 
 Hint: At every iteration of the robot's motion, what operations occur? 
 Hint 2: Use an indexing variable corresponding to the number of times the robot must move forward 
-
 
 
 

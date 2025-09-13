@@ -1,0 +1,29 @@
+
+(module
+  ;;(import func move)   @@@@@@@@@@@@@@FIX
+
+  (func $move_fn
+     call move
+  )
+
+  (func $main
+    (local $i i32)  ;; the looping variable
+    (local.set $i (i32.const 0))  ;; initialize i to 0
+
+    (loop $_loop
+        call move_fn
+
+        ;; Will add one to i
+        local.get $i
+        local.const 1
+        i32.add  ;; i+1 will be on the stack
+        local.set $i    ;; pop this stack value and set i to it
+
+        i32.const 512
+        i32.lt_s  ;; will check if i is less than 512
+        br_if $my_loop ;; if the statement is true then the execution will return to the start of the loop
+    )
+  )
+
+  (start $main)
+)
