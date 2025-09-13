@@ -4,16 +4,16 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-anyhow = "1.0.99"
 bevy = { version = "0.16.1", features = ["dynamic_linking"] }
 bevy_egui = "0.36.0"
 crossbeam-channel = "0.5.15"
 egui_commonmark = "0.21.1"
 egui_extras = {version = "0.32.3", features = ["syntect"]}
+futures-channel = "0.3.31"
 syntect = { version = "5.2.0", features = [ "default-fancy" ], default-features = false }
 # wasmtime = {version = "36.0.2", features = [
 wasmtime = { git = 'https://github.com/Eoghanmc22/wasmtime.git', features = [
-  # "async",
+  "async",
   "runtime",
   "gc",
   "component-model",

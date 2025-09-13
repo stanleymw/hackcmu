@@ -1,30 +1,219 @@
 // Relevent Docs
 // - https://docs.wasmtime.dev/examples-interrupting-wasm.html
-//
 
-use std::sync::mpsc;
+use std::time::Duration;
 
-use bevy::{platform::collections::HashSet, prelude::*};
-use wasmtime::{Caller, Engine, Instance, Module, Store};
+use bevy::{
+    ecs::query,
+    platform::collections::HashSet,
+    prelude::*,
+    tasks::{AsyncComputeTaskPool, Task, futures_lite::StreamExt},
+};
+use wasmtime::{AsContextMut, Caller, Config, Engine, Extern, Func, Instance, Module, Store};
 
-use crate::game::{GamePositionDelta, GameTurn};
+use crate::{
+    IsCurrentLevel,
+    game::{GamePositionDelta, GameResetEvent, GameState, GameTurn},
+};
 
 pub struct WasmPlugin;
 
 impl Plugin for WasmPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<WasmEventsIn>().add_event::<WasmEventsOut>();
+        let engine =
+            Engine::new(&Config::default().consume_fuel(true).async_support(true)).unwrap();
+
+        app.add_event::<WasmEventsIn>()
+            .add_event::<WasmEventsOut>()
+            .add_event::<CodeAction>()
+            .insert_resource(EngineRes(engine))
+            .insert_resource(ResumeTimerRes(Timer::new(
+                Duration::from_secs_f32(1.0),
+                TimerMode::Repeating,
+            )))
+            .add_systems(
+                Update,
+                (
+                    forward_inbound_messages,
+                    invalidate_on_code_change,
+                    handle_code_action,
+                    handle_task_finish,
+                    kill_old_levels,
+                    resume_timer,
+                ),
+            );
     }
+}
+
+fn forward_inbound_messages(
+    mut events: EventWriter<GamePositionDelta>,
+    mut query: Query<(&mut WasmTask, &mut WasmChannels)>,
+) {
+    for (mut task, mut ch) in query.iter_mut() {
+        while let Ok(Some(event)) = ch.from_wasm.try_next() {
+            match event {
+                WasmEventsOut::Delta(game_position_delta) => {
+                    events.write(game_position_delta);
+                }
+                WasmEventsOut::IsFinished => {
+                    task.finished = true;
+                }
+            }
+        }
+    }
+}
+
+fn resume_timer(
+    mut timer: ResMut<ResumeTimerRes>,
+    time: Res<Time>,
+    state: Res<GameState>,
+    query: Query<&WasmChannels>,
+) {
+    timer.0.tick(time.delta());
+
+    if timer.0.finished() {
+        match *state {
+            GameState::Run => {
+                for ch in query {
+                    let _ = ch.to_wasm.unbounded_send(WasmEventsIn::Resume);
+                }
+            }
+            _ => {}
+        }
+    }
+}
+
+fn invalidate_on_code_change(
+    mut cmds: Commands,
+    query: Query<(Entity, Option<&WasmChannels>), Changed<CodeBuffer>>,
+) {
+    for (entity, ch) in query.iter() {
+        if let Some(ch) = ch {
+            let _ = ch.to_wasm.unbounded_send(WasmEventsIn::Abort);
+        }
+        cmds.entity(entity).remove::<WasmChannels>();
+        cmds.entity(entity).remove::<WasmTask>();
+    }
+}
+
+fn handle_code_action(
+    mut cmds: Commands,
+    engine: Res<EngineRes>,
+    mut game_state: ResMut<GameState>,
+    mut events: EventReader<CodeAction>,
+    mut reset_event: EventWriter<GameResetEvent>,
+    code: Single<
+        (
+            Entity,
+            &CodeBuffer,
+            &AvaibleCallbacks,
+            Option<&WasmChannels>,
+        ),
+        With<IsCurrentLevel>,
+    >,
+) -> Result {
+    let (entity, buf, callbacks, channels) = *code;
+
+    for event in events.read() {
+        match event {
+            CodeAction::CompileAndRun => {
+                reset_event.write(GameResetEvent);
+                *game_state = GameState::Run;
+
+                if let Some(channels) = channels {
+                    let _ = channels.to_wasm.unbounded_send(WasmEventsIn::Abort);
+                }
+
+                let (mut compiled, channels) = compile_code(&buf.code, callbacks, &engine.0)?;
+
+                let thread_pool = AsyncComputeTaskPool::get();
+                let task = thread_pool.spawn(async move { compiled.instantiate().await });
+
+                cmds.entity(entity).insert((
+                    WasmTask {
+                        task,
+                        finished: false,
+                    },
+                    channels,
+                ));
+            }
+            CodeAction::Pause => {
+                *game_state = GameState::Pause;
+            }
+            CodeAction::Stop => {
+                reset_event.write(GameResetEvent);
+                *game_state = GameState::Pause;
+
+                if let Some(channels) = channels {
+                    let _ = channels.to_wasm.unbounded_send(WasmEventsIn::Abort);
+                }
+                cmds.entity(entity).remove::<WasmChannels>();
+                cmds.entity(entity).remove::<WasmTask>();
+            }
+        }
+    }
+
+    Ok(())
+}
+
+fn handle_task_finish(
+    mut cmds: Commands,
+    query: Query<(Entity, Option<&WasmChannels>, Option<&WasmTask>)>,
+) {
+    for (entity, ch, task) in query.iter() {
+        if ch.is_some() != task.is_some() {
+            println!("Sanity check failed: {}:{}:{}", file!(), line!(), column!());
+        }
+
+        if let Some(task) = task {
+            // if task.task.is_finished() {
+            if task.finished {
+                cmds.entity(entity).remove::<WasmChannels>();
+                cmds.entity(entity).remove::<WasmTask>();
+            }
+        }
+    }
+}
+
+fn kill_old_levels(
+    mut cmds: Commands,
+    query: Query<(Entity, Option<&WasmChannels>, Option<&WasmTask>), Without<IsCurrentLevel>>,
+) {
+    for (entity, ch, task) in query.iter() {
+        let Some(_) = task else { continue };
+
+        if let Some(ch) = ch {
+            let _ = ch.to_wasm.unbounded_send(WasmEventsIn::Abort);
+        }
+
+        cmds.entity(entity).remove::<WasmChannels>();
+        cmds.entity(entity).remove::<WasmTask>();
+    }
+}
+
+#[derive(Resource)]
+pub struct ResumeTimerRes(Timer);
+
+#[derive(Resource)]
+pub struct EngineRes(Engine);
+
+#[derive(Event)]
+pub enum CodeAction {
+    CompileAndRun,
+    Pause,
+    Stop,
 }
 
 #[derive(Event)]
 pub enum WasmEventsOut {
     Delta(GamePositionDelta),
+    IsFinished,
 }
 
 #[derive(Event)]
 pub enum WasmEventsIn {
     Resume,
+    Abort,
 }
 
 #[derive(Component)]
@@ -32,11 +221,13 @@ pub struct CodeBuffer {
     pub code: String,
 }
 
-#[derive(Component)]
 pub struct CompiledCode {
     module: Module,
     store: Store<WasmContext>,
-    instance: Instance,
+    imports: Vec<Extern>,
+    to_bevy: futures_channel::mpsc::UnboundedSender<WasmEventsOut>,
+
+    instance: Option<Instance>,
 }
 
 #[derive(Component)]
@@ -46,18 +237,24 @@ pub struct AvaibleCallbacks {
 
 /// Wasm side of channels
 pub struct WasmContext {
-    from_bevy: crossbeam_channel::Receiver<WasmEventsIn>,
-    to_bevy: crossbeam_channel::Sender<WasmEventsOut>,
+    from_bevy: futures_channel::mpsc::UnboundedReceiver<WasmEventsIn>,
+    to_bevy: futures_channel::mpsc::UnboundedSender<WasmEventsOut>,
 }
 
 /// bevy side of channels
 #[derive(Component)]
 pub struct WasmChannels {
-    from_bevy: crossbeam_channel::Receiver<WasmEventsIn>,
-    to_bevy: crossbeam_channel::Sender<WasmEventsOut>,
+    from_wasm: futures_channel::mpsc::UnboundedReceiver<WasmEventsOut>,
+    to_wasm: futures_channel::mpsc::UnboundedSender<WasmEventsIn>,
 }
 
-#[derive(PartialEq, Eq, Hash)]
+#[derive(Component)]
+pub struct WasmTask {
+    task: Task<Result>,
+    finished: bool,
+}
+
+#[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
 pub enum WasmCallback {
     Move,
     TurnRight,
@@ -66,57 +263,141 @@ pub enum WasmCallback {
 }
 
 impl WasmCallback {
-    fn call(&self, mut caller: Caller<'_, WasmContext>) {
-        let data = caller.data();
+    async fn call(&self, mut caller: Caller<'_, WasmContext>) {
+        println!("Running callback: {self:?}");
 
-        for event in data.from_bevy.try_iter() {
-            // TODO:
-        }
+        let data = caller.data_mut();
 
-        match self {
-            WasmCallback::Move => {
-                data.to_bevy.send(WasmEventsOut::Delta(GamePositionDelta {
-                    x: 1,
-                    y: 0,
-                    rot: GameTurn::Straight,
-                }));
-            }
-            WasmCallback::TurnRight => {
-                data.to_bevy.send(WasmEventsOut::Delta(GamePositionDelta {
-                    x: 0,
-                    y: 0,
-                    rot: GameTurn::Right,
-                }));
-            }
-        }
-
-        for event in data.from_bevy.iter() {
+        while let Ok(Some(event)) = data.from_bevy.try_next() {
             match event {
-                WasmEventsIn::Resume => break,
-                _ => {
-                    // TODO:
+                WasmEventsIn::Resume => {}
+                WasmEventsIn::Abort => {
+                    println!("Got Abort");
+                    let _ = caller.as_context_mut().set_fuel(0);
+                    return;
                 }
             }
         }
+
+        println!("Handled queued events");
+
+        match self {
+            WasmCallback::Move => {
+                let _ = data
+                    .to_bevy
+                    .unbounded_send(WasmEventsOut::Delta(GamePositionDelta {
+                        x: 1,
+                        y: 0,
+                        rot: GameTurn::Straight,
+                    }));
+            }
+            WasmCallback::TurnRight => {
+                let _ = data
+                    .to_bevy
+                    .unbounded_send(WasmEventsOut::Delta(GamePositionDelta {
+                        x: 0,
+                        y: 0,
+                        rot: GameTurn::Right,
+                    }));
+            }
+        }
+
+        println!("Waiting for resume event");
+
+        while let Some(event) = data.from_bevy.next().await {
+            match event {
+                WasmEventsIn::Resume => break,
+                WasmEventsIn::Abort => {
+                    println!("Got Abort");
+                    let _ = caller.as_context_mut().set_fuel(0);
+                    return;
+                }
+            }
+        }
+
+        println!("Got Resume");
     }
 }
 
-// fn create_context() -> (CO)
-//
-// fn compile_code(
-//     code: &str,
-//     callbacks: &AvaibleCallbacks,
-//     engine: &Engine,
-// ) -> anyhow::Result<CompiledCode> {
-//     let module = Module::new(&engine, "examples/hello.wat")?;
-//
-//     let mut store = Store::new(
-//         &engine,
-//         MyState {
-//             name: "hello, world!".to_string(),
-//             count: 0,
-//         },
-//     );
-//
-//     todo!()
-// }
+fn create_context() -> (WasmContext, WasmChannels) {
+    let (bevy_to_wasm_tx, bevy_to_wasm_rx) = futures_channel::mpsc::unbounded();
+    let (wasm_to_bevy_tx, wasm_to_bevy_rx) = futures_channel::mpsc::unbounded();
+
+    (
+        WasmContext {
+            from_bevy: bevy_to_wasm_rx,
+            to_bevy: wasm_to_bevy_tx,
+        },
+        WasmChannels {
+            from_wasm: wasm_to_bevy_rx,
+            to_wasm: bevy_to_wasm_tx,
+        },
+    )
+}
+
+pub fn compile_code(
+    code: &str,
+    callbacks: &AvaibleCallbacks,
+    engine: &Engine,
+) -> Result<(CompiledCode, WasmChannels)> {
+    let module = Module::new(&engine, code)?;
+
+    let (wasm_ctx, bevy_ctx) = create_context();
+    let to_bevy = wasm_ctx.to_bevy.clone();
+
+    let mut store = Store::new(&engine, wasm_ctx);
+
+    store.set_fuel(10_000)?;
+    store.fuel_async_yield_interval(Some(100))?;
+
+    let imports: Vec<Extern> = callbacks
+        .callbacks
+        .iter()
+        .map(|callback| {
+            let callback = callback.clone();
+
+            Func::wrap_async(
+                &mut store,
+                move |caller: Caller<'_, WasmContext>, _args: ()| {
+                    Box::new(async move {
+                        callback.call(caller).await;
+                    })
+                },
+            )
+            .into()
+        })
+        .collect::<Vec<_>>();
+
+    // Note, This line starts running the code
+    // let instance = Instance::new(&mut store, &module, &imports)?;
+
+    Ok((
+        CompiledCode {
+            module,
+            store,
+            imports,
+            instance: None,
+            to_bevy,
+        },
+        bevy_ctx,
+    ))
+}
+
+impl CompiledCode {
+    /// This will start running user code
+    pub async fn instantiate(&mut self) -> Result<()> {
+        let Self {
+            module,
+            store,
+            imports,
+            instance,
+            ..
+        } = self;
+
+        *instance = Some(Instance::new_async(store, module, &imports).await?);
+
+        let _ = self.to_bevy.unbounded_send(WasmEventsOut::IsFinished);
+
+        Ok(())
+    }
+}

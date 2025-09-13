@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use bevy::prelude::*;
 
 pub struct GamePlugin;
@@ -5,7 +7,12 @@ pub struct GamePlugin;
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<GamePositionDelta>()
-            .add_systems(Update, (animate_position, read_position_deltas));
+            .add_event::<GameResetEvent>()
+            .add_systems(
+                Update,
+                (animate_position, read_position_deltas, handle_reset),
+            )
+            .init_resource::<GameState>();
     }
 }
 
@@ -42,6 +49,23 @@ fn read_position_deltas(
             *pos = pos.shift_by(*delta);
         }
     }
+}
+
+// TODO: Implement
+fn handle_reset(mut events: EventReader<GameResetEvent>) {
+    for event in events.read() {
+        todo!("Game reset logic");
+    }
+}
+
+#[derive(Event)]
+pub struct GameResetEvent;
+
+#[derive(Resource, Default)]
+pub enum GameState {
+    Run,
+    #[default]
+    Pause,
 }
 
 #[derive(Component)]
