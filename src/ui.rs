@@ -1,15 +1,16 @@
-use bevy::{ecs::system::command::insert_resource, prelude::*};
-use bevy_egui::{
-    EguiPlugin, EguiPrimaryContextPass,
-};
+use bevy::{ecs::system::command::insert_resource, prelude::*, ui::AvailableSpace};
+use bevy_egui::{EguiPlugin, EguiPrimaryContextPass};
 use egui_extras::syntax_highlighting::{CodeTheme, SyntectSettings};
 use syntect::parsing::SyntaxDefinition;
 
-use crate::{LevelIndex, wasm::CodeBuffer};
+use crate::{
+    LevelIndex,
+    wasm::{AvaibleCallbacks, CodeBuffer, WasmCallback},
+};
 
 pub mod code_editor;
-pub mod settings;
 pub mod reference;
+pub mod settings;
 
 pub struct UiPlugin;
 
@@ -27,7 +28,14 @@ impl Plugin for UiPlugin {
 
         app.add_plugins(EguiPlugin::default())
             .add_systems(Startup, setup_camera_system)
-            .add_systems(EguiPrimaryContextPass, (code_editor::code_editor, settings::settings_ui, reference::reference_ui))
+            .add_systems(
+                EguiPrimaryContextPass,
+                (
+                    code_editor::code_editor,
+                    settings::settings_ui,
+                    reference::reference_ui,
+                ),
+            )
             .insert_resource(code_editor::SyntectSetting {
                 settings: syntect_settings,
             })
@@ -40,17 +48,52 @@ impl Plugin for UiPlugin {
 fn setup_camera_system(mut commands: Commands) {
     commands.spawn(Camera2d);
 
-    for i in 0..8 {
-        commands.spawn((
-            CodeBuffer {
-                code: format!("\
-(module
-    ;; Sample code for level {i}
-)\
-                ").into(),
-            },
-            LevelIndex(i),
-        ));
-    }
-}
+    commands.spawn((
+        CodeBuffer {
+            code: include_str!("../res/SolCode1.wat").to_owned(),
+        },
+        AvaibleCallbacks {
+            callbacks: [WasmCallback::Move].into(),
+        },
+        LevelIndex(0),
+    ));
 
+    commands.spawn((
+        CodeBuffer {
+            code: include_str!("../res/SolCode2.wat").to_owned(),
+        },
+        LevelIndex(1),
+    ));
+
+    commands.spawn((
+        CodeBuffer {
+            code: include_str!("../res/SolCode3.wat").to_owned(),
+        },
+        LevelIndex(2),
+    ));
+
+    commands.spawn((
+        CodeBuffer {
+            code: include_str!("../res/SolCode4.wat").to_owned(),
+        },
+        LevelIndex(3),
+    ));
+    commands.spawn((
+        CodeBuffer {
+            code: include_str!("../res/SolCode5.wat").to_owned(),
+        },
+        LevelIndex(4),
+    ));
+    commands.spawn((
+        CodeBuffer {
+            code: include_str!("../res/SolCode6.wat").to_owned(),
+        },
+        LevelIndex(5),
+    ));
+    commands.spawn((
+        CodeBuffer {
+            code: include_str!("../res/SolCode7.wat").to_owned(),
+        },
+        LevelIndex(6),
+    ));
+}

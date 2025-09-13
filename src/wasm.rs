@@ -238,7 +238,7 @@ pub struct CompiledCode {
 
 #[derive(Component, Default)]
 pub struct AvaibleCallbacks {
-    callbacks: HashSet<WasmCallback>,
+    pub callbacks: HashSet<WasmCallback>,
 }
 
 /// Wasm side of channels

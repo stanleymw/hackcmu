@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_egui::{
     EguiContexts,
-    egui::{self, Style, TextEdit, Vec2, vec2},
+    egui::{self, ScrollArea, Style, TextEdit, Vec2, vec2},
 };
 use egui_extras::syntax_highlighting::{CodeTheme, SyntectSettings};
 
@@ -46,8 +46,10 @@ pub fn code_editor(
     egui::Window::new(format!("Level {}", current_level.index))
         .id("Level UI".into())
         .show(contexts.ctx_mut()?, |ui| {
-            ui.checkbox(&mut settings_window_open.0, "Settings");
-            ui.checkbox(&mut reference_window_open.0, "Reference");
+            ui.horizontal(|ui| {
+                ui.checkbox(&mut settings_window_open.0, "Settings");
+                ui.checkbox(&mut reference_window_open.0, "Reference");
+            });
 
             if ui.button("Next Level").clicked() {
                 commands.insert_resource(CurrentLevel {
@@ -61,15 +63,17 @@ pub fn code_editor(
                 });
             }
 
-            if ui.button("▶ Play").clicked() {
-                code_actions.write(CodeAction::CompileAndRun);
-            }
-            if ui.button("⏸ Pause").clicked() {
-                code_actions.write(CodeAction::Pause);
-            }
-            if ui.button("↩ Reset").clicked() {
-                code_actions.write(CodeAction::Stop);
-            }
+            ui.horizontal(|ui| {
+                if ui.button("▶ Play").clicked() {
+                    code_actions.write(CodeAction::CompileAndRun);
+                }
+                if ui.button("⏸ Pause").clicked() {
+                    code_actions.write(CodeAction::Pause);
+                }
+                if ui.button("↩ Reset").clicked() {
+                    code_actions.write(CodeAction::Stop);
+                }
+            });
 
             for (mut buf, idx) in level_query.iter_mut() {
                 if idx.0 != current_level.index {
@@ -89,12 +93,14 @@ pub fn code_editor(
                     layout_job.wrap.max_width = wrap_width;
                     ui.fonts(|f| f.layout_job(layout_job))
                 };
-                ui.add(
-                    TextEdit::multiline(&mut buf.code)
-                        .code_editor()
-                        .layouter(&mut layouter)
-                        .min_size(Vec2 { x: 64.0, y: 324.0 }),
-                );
+                egui::ScrollArea::vertical().show(ui, |ui| {
+                    ui.add(
+                        TextEdit::multiline(&mut buf.code)
+                            .code_editor()
+                            .layouter(&mut layouter)
+                            .min_size(Vec2 { x: 64.0, y: 324.0 }),
+                    );
+                });
             }
 
             // ui.allocate_space(vec2(64.0, 256.0));
@@ -102,4 +108,3 @@ pub fn code_editor(
 
     Ok(())
 }
-
