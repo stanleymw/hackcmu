@@ -8,11 +8,41 @@ bevy = { version = "0.16.1", features = ["dynamic_linking"] }
 bevy_egui = "0.36.0"
 egui_extras = {version = "0.32.3", features = ["syntect"]}
 syntect = { version = "5.2.0", features = [ "default-fancy" ], default-features = false }
-wasmtime = "36.0.2"
+wasmtime = {version = "36.0.2", features = [
+  "async",
+  "runtime",
+  "gc",
+  "component-model",
+  "pulley",
+  "wat",
+
+  # Default features that do work on wasm
+  # "async",
+  # "gc",
+  # "gc-drc",
+  # "gc-null",
+  # "wat",
+  # "debug-builtins",
+  # "runtime",
+  # "component-model",
+
+  # Default features that dont work on wasm
+  # "addr2line",
+  # "cache",
+  # "profiling",
+  # "parallel-compilation",
+  # "cranelift",
+  # "pooling-allocator",
+  # "demangle",
+  # "coredump",
+  # "threads",
+  # "stack-switching",
+  # "std",
+], default-features = false }
 
 [profile.web]
 inherits = "release"
 lto = true
-codegen-units = 1    # bevy = { version = "0.12", default-features = false, features = ["animation", "bevy_asset", "bevy_gilrs", "bevy_scene", "bevy_winit", "bevy_core_pipeline", "bevy_pbr", "bevy_gltf", "bevy_render", "multi-threaded", "filesystem_watcher", "wayland", "webgl2", "tonemapping_luts", "ktx2", "zstd", "default_font", "dynamic_linking"] }
+codegen-units = 1
 opt-level = 's'
 debug = false
