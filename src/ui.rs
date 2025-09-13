@@ -46,7 +46,7 @@ impl Plugin for UiPlugin {
 }
 
 fn setup_camera_system(mut commands: Commands) {
-    commands.spawn(Camera2d);
+    // commands.spawn(Camera2d);
 
     commands.spawn((
         CodeBuffer {

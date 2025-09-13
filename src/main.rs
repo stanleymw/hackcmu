@@ -1,6 +1,7 @@
 use bevy::{ecs::query, prelude::*};
 
 pub mod game;
+pub mod render3d;
 pub mod ui;
 pub mod wasm;
 
@@ -11,6 +12,7 @@ fn main() {
             ui::UiPlugin,
             game::GamePlugin,
             wasm::WasmPlugin,
+            render3d::Render3dPlugin,
         ))
         .insert_resource(CurrentLevel { index: 0 })
         .add_systems(Update, update_is_current_level)

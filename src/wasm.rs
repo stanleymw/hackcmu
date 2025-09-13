@@ -3,6 +3,7 @@
 
 use std::time::Duration;
 
+use anyhow::Context;
 use bevy::{
     ecs::query,
     platform::collections::HashSet,
@@ -147,9 +148,14 @@ fn handle_code_action(
                         ));
                     }
                     Err(err) => {
-                        error_events.write(WasmCompileError {
-                            error: format!("{err:?}"),
-                        });
+                        let error = format!("{err:?}");
+                        let error = error.split("Stack backtrace").next();
+
+                        if let Some(error) = error {
+                            error_events.write(WasmCompileError {
+                                error: error.into(),
+                            });
+                        }
                     }
                 }
             }
@@ -271,7 +277,7 @@ pub struct WasmChannels {
 
 #[derive(Component)]
 pub struct WasmTask {
-    task: Task<Result>,
+    task: Task<anyhow::Result<()>>,
     finished: bool,
 }
 
@@ -367,31 +373,35 @@ pub fn compile_code(
     code: &str,
     callbacks: &AvaibleCallbacks,
     engine: &Engine,
-) -> Result<(CompiledCode, WasmChannels)> {
+) -> anyhow::Result<(CompiledCode, WasmChannels)> {
     println!("Compiling code");
 
-    let module = Module::new(&engine, code)?;
+    let module = Module::new(&engine, code).context("Parse module")?;
 
     let (wasm_ctx, bevy_ctx) = create_context();
     let to_bevy = wasm_ctx.to_bevy.clone();
 
     let mut store = Store::new(&engine, wasm_ctx);
 
-    store.set_fuel(10_000)?;
-    store.fuel_async_yield_interval(Some(100))?;
+    store.set_fuel(10_000).context("Set fuel")?;
+    store
+        .fuel_async_yield_interval(Some(100))
+        .context("Set yield interval")?;
 
     let mut linker = Linker::new(&engine);
 
     for callback in callbacks.callbacks.iter().copied() {
-        linker.func_wrap_async(
-            "builtin",
-            callback.name(),
-            move |caller: Caller<'_, WasmContext>, _args: ()| {
-                Box::new(async move {
-                    callback.call(caller).await;
-                })
-            },
-        )?;
+        linker
+            .func_wrap_async(
+                "builtin",
+                callback.name(),
+                move |caller: Caller<'_, WasmContext>, _args: ()| {
+                    Box::new(async move {
+                        callback.call(caller).await;
+                    })
+                },
+            )
+            .context("Add func to linker")?;
     }
 
     // Note, This line starts running the code
@@ -413,7 +423,7 @@ pub fn compile_code(
 
 impl CompiledCode {
     /// This will start running user code
-    pub async fn instantiate(&mut self) -> Result<()> {
+    pub async fn instantiate(&mut self) -> anyhow::Result<()> {
         let Self {
             module,
             store,
@@ -425,7 +435,12 @@ impl CompiledCode {
         println!("Running Code");
 
         // TODO: look into instantiate_pre()
-        *instance = Some(linker.instantiate_async(store, module).await?);
+        *instance = Some(
+            linker
+                .instantiate_async(store, module)
+                .await
+                .context("Execute code")?,
+        );
 
         let _ = self.to_bevy.unbounded_send(WasmEventsOut::IsFinished);
 
