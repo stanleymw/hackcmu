@@ -56,6 +56,8 @@
               xorg.libXi
               xorg.libXcursor
               libxkbcommon
+              udev
+              alsa-lib
             ];
           };
       }
