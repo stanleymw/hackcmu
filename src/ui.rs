@@ -64,6 +64,9 @@ fn setup_camera_system(mut commands: Commands) {
             code: include_str!("../res/Level2Init.wat").to_owned(),
             reference: include_str!("../res/Level2.md").to_owned(),
         },
+        AvaibleCallbacks {
+            callbacks: [WasmCallback::Move].into(),
+        },
         LevelIndex(1),
     ));
 
@@ -71,6 +74,9 @@ fn setup_camera_system(mut commands: Commands) {
         CodeBuffer {
             code: include_str!("../res/Level3Init.wat").to_owned(),
             reference: include_str!("../res/Level3.md").to_owned(),
+        },
+        AvaibleCallbacks {
+            callbacks: [WasmCallback::Move, WasmCallback::TurnRight].into(),
         },
         LevelIndex(2),
     ));
@@ -80,12 +86,18 @@ fn setup_camera_system(mut commands: Commands) {
             code: include_str!("../res/Level4Init.wat").to_owned(),
             reference: include_str!("../res/Level4.md").to_owned(),
         },
+        AvaibleCallbacks {
+            callbacks: [WasmCallback::Move].into(),
+        },
         LevelIndex(3),
     ));
     commands.spawn((
         CodeBuffer {
             code: include_str!("../res/Level5Init.wat").to_owned(),
             reference: include_str!("../res/Level5.md").to_owned(),
+        },
+        AvaibleCallbacks {
+            callbacks: [WasmCallback::Move].into(),
         },
         LevelIndex(4),
     ));
@@ -94,12 +106,18 @@ fn setup_camera_system(mut commands: Commands) {
             code: include_str!("../res/Level6Init.wat").to_owned(),
             reference: include_str!("../res/Level6.md").to_owned(),
         },
+        AvaibleCallbacks {
+            callbacks: [WasmCallback::Move].into(),
+        },
         LevelIndex(5),
     ));
     commands.spawn((
         CodeBuffer {
             code: include_str!("../res/Level7Init.wat").to_owned(),
             reference: include_str!("../res/Level7.md").to_owned(),
+        },
+        AvaibleCallbacks {
+            callbacks: [WasmCallback::Move, WasmCallback::TurnRight].into(),
         },
         LevelIndex(6),
     ));
