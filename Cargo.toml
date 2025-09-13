@@ -7,7 +7,7 @@ edition = "2024"
 bevy = { version = "0.16.1", features = ["dynamic_linking"] }
 bevy_egui = "0.36.0"
 egui_extras = {version = "0.32.3", features = ["syntect"]}
-syntect = "5.2.0"
+syntect = { version = "5.2.0", features = [ "default-fancy" ], default-features = false }
 wasmtime = "36.0.2"
 
 [profile.web]
