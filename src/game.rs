@@ -1,4 +1,6 @@
-use bevy::prelude::*;
+use bevy::{ecs::query, prelude::*};
+
+use crate::{HasWon, IsCurrentLevel};
 
 pub struct GamePlugin;
 
@@ -12,6 +14,7 @@ impl Plugin for GamePlugin {
                     animate_position,
                     read_position_deltas.after(handle_reset),
                     handle_reset,
+                    win_condition,
                 ),
             )
             .init_resource::<GameState>();
@@ -69,6 +72,23 @@ fn handle_reset(
         }
     }
 }
+
+fn win_condition(
+    mut has_won: ResMut<HasWon>,
+    win_pos: Query<&WinPosition, With<IsCurrentLevel>>,
+    robot_pos: Single<&GamePosition, With<Robot>>,
+) {
+    let Ok(win_pos) = win_pos.single() else {
+        return;
+    };
+
+    if **robot_pos == win_pos.0 {
+        has_won.0 = true;
+    }
+}
+
+#[derive(Component)]
+pub struct WinPosition(pub GamePosition);
 
 #[derive(Event)]
 pub struct GameResetEvent;
