@@ -1,14 +1,15 @@
-use bevy::prelude::*;
+use bevy::{ecs::system::command::insert_resource, prelude::*};
 use bevy_egui::{
-    EguiContextSettings, EguiContexts, EguiPlugin, EguiPrimaryContextPass,
-    egui::{self, Slider, Style, TextEdit},
+    EguiPlugin, EguiPrimaryContextPass,
 };
 use egui_extras::syntax_highlighting::{CodeTheme, SyntectSettings};
 use syntect::parsing::SyntaxDefinition;
 
-use crate::{CurrentLevel, LevelIndex, wasm::CodeBuffer};
+use crate::{LevelIndex, wasm::CodeBuffer};
 
 pub mod code_editor;
+pub mod settings;
+pub mod reference;
 
 pub struct UiPlugin;
 
@@ -26,10 +27,13 @@ impl Plugin for UiPlugin {
 
         app.add_plugins(EguiPlugin::default())
             .add_systems(Startup, setup_camera_system)
-            .add_systems(EguiPrimaryContextPass, (code_editor::code_editor, settings_ui))
+            .add_systems(EguiPrimaryContextPass, (code_editor::code_editor, settings::settings_ui, reference::reference_ui))
             .insert_resource(code_editor::SyntectSetting {
                 settings: syntect_settings,
-            });
+            })
+            .insert_resource(settings::SettingsOpen(false))
+            .insert_resource(reference::ReferenceOpen(false))
+            .insert_resource(code_editor::EditorTheme(CodeTheme::default()));
     }
 }
 
@@ -39,21 +43,14 @@ fn setup_camera_system(mut commands: Commands) {
     for i in 0..8 {
         commands.spawn((
             CodeBuffer {
-                code: format!("This is the code for level {i}!").into(),
+                code: format!("\
+(module
+    ;; Sample code for level {i}
+)\
+                ").into(),
             },
             LevelIndex(i),
         ));
     }
-}
-
-fn settings_ui(
-    mut contexts: EguiContexts,
-    egui_context: Single<(&mut EguiContextSettings,)>,
-) -> Result {
-    let (mut egui_settings,) = egui_context.into_inner();
-    egui::Window::new("Settings").show(contexts.ctx_mut()?, |ui| {
-        ui.add(Slider::new(&mut egui_settings.scale_factor, 1.0..=2.0))
-    });
-    Ok(())
 }
 
