@@ -9,7 +9,9 @@ use bevy::{
     prelude::*,
     tasks::{AsyncComputeTaskPool, Task, futures_lite::StreamExt},
 };
-use wasmtime::{AsContextMut, Caller, Config, Engine, Extern, Func, Instance, Module, Store};
+use wasmtime::{
+    AsContextMut, Caller, Config, Engine, Extern, Func, Instance, Linker, Module, Store,
+};
 
 use crate::{
     IsCurrentLevel,
@@ -228,7 +230,7 @@ pub struct CodeBuffer {
 pub struct CompiledCode {
     module: Module,
     store: Store<WasmContext>,
-    imports: Vec<Extern>,
+    linker: Linker<WasmContext>,
     to_bevy: futures_channel::mpsc::UnboundedSender<WasmEventsOut>,
 
     instance: Option<Instance>,
@@ -267,6 +269,13 @@ pub enum WasmCallback {
 }
 
 impl WasmCallback {
+    fn name(&self) -> &'static str {
+        match self {
+            WasmCallback::Move => "move",
+            WasmCallback::TurnRight => "turn_right",
+        }
+    }
+
     async fn call(&self, mut caller: Caller<'_, WasmContext>) {
         println!("Running callback: {self:?}");
 
@@ -356,23 +365,19 @@ pub fn compile_code(
     store.set_fuel(10_000)?;
     store.fuel_async_yield_interval(Some(100))?;
 
-    let imports: Vec<Extern> = callbacks
-        .callbacks
-        .iter()
-        .map(|callback| {
-            let callback = callback.clone();
+    let mut linker = Linker::new(&engine);
 
-            Func::wrap_async(
-                &mut store,
-                move |caller: Caller<'_, WasmContext>, _args: ()| {
-                    Box::new(async move {
-                        callback.call(caller).await;
-                    })
-                },
-            )
-            .into()
-        })
-        .collect::<Vec<_>>();
+    for callback in callbacks.callbacks.iter().copied() {
+        linker.func_wrap_async(
+            "builtin",
+            callback.name(),
+            move |caller: Caller<'_, WasmContext>, _args: ()| {
+                Box::new(async move {
+                    callback.call(caller).await;
+                })
+            },
+        )?;
+    }
 
     // Note, This line starts running the code
     // let instance = Instance::new(&mut store, &module, &imports)?;
@@ -383,7 +388,7 @@ pub fn compile_code(
         CompiledCode {
             module,
             store,
-            imports,
+            linker,
             instance: None,
             to_bevy,
         },
@@ -397,14 +402,15 @@ impl CompiledCode {
         let Self {
             module,
             store,
-            imports,
+            linker,
             instance,
             ..
         } = self;
 
         println!("Running Code");
 
-        *instance = Some(Instance::new_async(store, module, &imports).await?);
+        // TODO: look into instantiate_pre()
+        *instance = Some(linker.instantiate_async(store, module).await?);
 
         let _ = self.to_bevy.unbounded_send(WasmEventsOut::IsFinished);
 
