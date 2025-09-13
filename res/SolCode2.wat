@@ -1,6 +1,6 @@
 (module
   (import "builtin" "move" (func $move))
-  (import "builtin" "turn_right" (func $turnRight))
+  (import "builtin" "turn_right" (func $turn_right))
 
   (func $move_fn
     call $move
@@ -8,7 +8,7 @@
   )
 
   (func $turnRight_fn
-    call $turnRight
+    call $turn_right
   )
  
   (start $move_fn)
