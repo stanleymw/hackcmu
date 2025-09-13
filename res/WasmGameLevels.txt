@@ -1,0 +1,228 @@
+Level 1:
+
+Welcome to level 1! Wasm is an amazing language, and we are very happy that you are interested in learning it! It's time to call your function in assembly!
+
+Wasm is a versatile assembly language that utilizes a stack environment. A module is the fundamental, overarching unit in a Wasm environment, and functions 
+and other code are written inside. The primary blocks that will occur within the wasm module will be function blocks, which can then be executed by the command (start function_name).  
+
+Task: make the robot move to the goal by calling move repeatedly
+
+Library Reference: look at the functions module
+Hint: how do you call multiple functions using the start module?  
+
+Sample Code: 
+
+(module
+  ;;(import func move)   ;; Import the move function @@@@@@@@@FIX@@@@@@@@@@@
+
+  (func $moveFn
+    call move
+  )
+
+  ;; Run the function $moveFn by name
+  (start $moveFn)
+)
+
+Result: This will make the robot move forward one square
+
+
+
+
+
+Level 2:
+
+Congratulations on passing level 1! Now the robot must also turn right to be able to navigate a more complex maze, using the turnRight(function). 
+In this case, both functions must be imported before they can be used. 
+
+Task: Import the function turnRight and make the robot navigate the maze by calling move several times and turnRight twice. 
+
+Library Reference: look at the functions module
+Hint: define a function to call turnRight too. 
+
+Sample Code:
+
+(module
+  ;;(import func move)   @@@@@@@@@@@@@@FIX
+
+  (func $move_fn
+    call move
+  )
+ 
+  (start $move_fn)
+)
+
+Result: This will make the robot move forward one square forward and then turn right. 
+
+
+
+
+
+
+
+Level 3: 
+
+Congratulations advancing hacker! I am the Great Invisible Monster of Wasm and will destroy the robot if you do not have it pass through the waypoint. 
+Save your friend by telling it how to reach the goal while still passing through the waypoint.
+
+Task: First, create the function turn_left by calling turnRight multiple times. Then, call move, turnRight, and turnLeft 
+repeatedly so that the robot passes through the waypoint on the right branch before reaching the goal.
+
+Hint: What is the transformation between turnLeft and turnRight in terms of degrees turned?
+
+Sample Code:
+
+(module
+  ;;(import func move)   @@@@@@@@@@@@@@FIX
+
+  (func $moveForwardTwice
+    call move
+    call move
+  )
+
+  (start $moveForwardTwice)
+)
+
+Result: This will define a function moveForwardTwice that calls the move function twice. Finally, the robot will move forward two squares when moveForwardTwice is called. 
+
+
+
+
+
+Level 4:
+
+Congratulations on saving the robot! You can't make many useful programs without knowing how to utilize arithmetic operations and loops! 
+To create loop in Wasm, the loop block is used. When the loop guard is true, the program execution must jump to the start of the loop. 
+
+Task: Have the robot move forward 512 squares by using a for loop within the main function and calling move repeatedly.    
+
+Sample Code: 
+
+(module
+  (func $main
+    ;; an example loop that will print the integers from 1 to 5 using a loop
+    (local $i i32)  ;; the looping variable
+    (local.set $i (i32.const 0))  ;; initialize i to 0
+
+    (loop $_loop
+        ;; @@@@@@@@@@@@@@@ Print the value: ToDo@@@@@@@@@@@, potentially
+
+        ;; Will add one to i
+        local.get $i
+        local.const 1
+        i32.add  ;; i+1 will be on the stack
+        local.set $i    ;; pop this stack value and set i to it
+
+        i32.const 5
+        i32.lt_s  ;; will check if i is less than 5
+        br_if $my_loop ;; if the statement is true then the execution will return to the start of the loop
+    )
+  )
+  (start $main)
+)
+
+Result: creating a loop in assembly that iterates over the integers from 0 through 4, inclusive. 
+
+
+
+
+Level 5: 
+
+Now it is time for you to make your first Wasm function that utilizes input parameters! 
+
+Function definitions also have optional clauses for input parameters and results. The keywords for parameters and results are "param" and "result" respectively. 
+There is one parameter clause for each input in the form (param var_name var_type). For example, var_type could be i32. A result clause would be in the form (result result_type).  
+
+Task: Create a function moveNTimes that causes the robot to move forward the number of times corresponding to the argument that is passed. 
+The function takes one i32 parameter and returns nothing. Finally, tell the robot to move forward 255 steps by calling this function.   
+
+Hint: Make sure to create a for loop within the function moveNTimes
+
+Sample Code: 
+
+(module
+  ;;  @@@@@@@@@@@@@@ToDo: import printing features
+
+  (func $IncrementAndPrint (param $input i32) ;; create the IncrementAndPrint function using the correct signature
+    local.get input
+    i32.const 1
+    add
+    ;; @@@@@@@@@@@@ToDo: print the incremented value of the input
+  )
+
+  (func $main 
+    i32.const 5   ;; will push 5 on the stack
+    call $IncrementAndPrint   ;; will consume the value on the stack and call $IncrementAndPrint
+  )
+
+  (start $main)   
+)
+
+Result: Calling the $IncrementAndPrint this will increment the input value by one and print it
+
+
+
+
+Level 6:
+
+The Great Invisible Monster of Wasm painted over part of the Robot Master's scroll, and an important number is hidden. 
+Luckily, the Robot Master's recipe for determining this number is still available. 
+The readable part of the scroll reads: 
+
+@@@@@@@@@@@@ToDo: italic-text
+"There is a variable equal to 70. There is a second variable initially equal to six times the first one. The robot must travel the product of the two variables minus the second variable."  
+
+It is important to keep in mind that Wasm uses a stack structure for variables and function calls. 
+
+Hint: the code for the subtract operation is sub and the code for the multiplication operation is mul
+Hint 2: The second number loaded on the stack will be subtracted from the first number loaded on the stack
+Hint 3: You can call the moveNForward function with an argument as the computed value
+
+
+Sample Code: 
+
+(module
+  ;; @@@@@@@@@@@@@@FIX: Import needed print function
+  (func $main
+    (local $var1 i32) ;; Create a local variable $var1
+    (local $var2 i32) ;; Create a local variable $var2 
+    i32.const 40  ;; Load the constant 40 on the stack
+    (local.set $var1)  ;; Will pop the value 40 from the stack and store it into $var1
+    (local.set $var2 (i32.const 28)) ;; Directly load 28 into then local variable $var2 
+
+    ;; Load the local variables onto the stack
+    (local.get $var1)
+    (local.get $var2)  
+    i32.add
+
+    ;; @@@@@@@@@@@@@@FIX: should log the result to the console
+  )
+  
+  (start $main)
+)
+
+Result: This program will print the result of adding 40 and 28. 
+
+
+
+
+
+
+Level 7:
+
+Congratulations Wasm Master! You have reached the final level! To celebrate, the robot would like to move in a giant spiral!
+However, the robot does not know how to move in this manner, and needs your help!
+
+Task: Using the functions moveNForward and TurnLeft, and loops as needed, have the robot move in an interesting quasi-spiral pattern with the outer dimension being 32. 
+The robot should move 32 squares up (its starting orientation is upwards), turn left, move 31 squares leftwards, turn left again, move 30 squares down, and continue in 
+this fashion until it forward just one square.  
+
+Hint: At every iteration of the robot's motion, what operations occur? 
+Hint 2: Use an indexing variable corresponding to the number of times the robot must move forward 
+
+
+
+
+Final Message after level 7:
+
+Congratulations on finishing the game and becoming a certified assembly language hacker!
+We hope that you will continue enjoying Wasm!
