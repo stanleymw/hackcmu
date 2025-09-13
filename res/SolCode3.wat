@@ -1,19 +1,19 @@
 (module
   ;;(import func move)   @@@@@@@@@@@@@@FIX
-  ;;(import func turnRight)   @@@@@@@@@@@@@@FIX
+  ;;(import func turn_right)   @@@@@@@@@@@@@@FIX
 
   (func $move_fn
     call move
   )
 
   (func $turnRight_fn
-    call turnRight
+    call turn_right
   )
 
   (func $turnLeft_fn
-    call turnRight
-    call turnRight
-    call turnRight
+    call turn_right
+    call turn_right
+    call turn_right
   )
 
   (func $main

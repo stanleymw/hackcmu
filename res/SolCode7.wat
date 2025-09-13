@@ -1,13 +1,19 @@
 (module
     ;;(import func move)   @@@@@@@@@@@@@@FIX
-    ;;(import func turnRight)   @@@@@@@@@@@@@@FIX
+    ;;(import func turn_right)   @@@@@@@@@@@@@@FIX
 
     (func $move_fn
         call move
     )
 
     (func $turnRight_fn
-    call turnRight
+    call turn_right
+    )
+
+    (func $turnLeft_fn
+    call turn_right
+    call turn_right
+    call turn_right
     )
 
     (func moveNTimes (param $n i32)
@@ -36,7 +42,7 @@
         (loop $_loop
             (local.get $i)
             call moveNTimes  ;; consume
-            call turnRight_fn
+            call turnLeft_fn
 
             ;; Will add one to i
             local.get $i

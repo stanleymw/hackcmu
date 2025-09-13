@@ -61,7 +61,8 @@ Result: This will make the robot move forward one square forward.
 
 Level 3: 
 
-Congratulations advancing hacker! I am the Great Invisible Monster of Wasm and will destroy the robot if you do not have it pass through the waypoint. 
+Congratulations advancing hacker! I am the Great Invisible Monster of Wasm and will destroy the robot if you do not have it pass through the 
+waypoint. 
 Save your friend by telling it how to reach the goal while still passing through the waypoint.
 
 Task: First, create the function turn_left by calling turnRight multiple times. Then, call move, turnRight, and turnLeft 
@@ -82,7 +83,8 @@ Sample Code:
   (start $moveForwardTwice)
 )
 
-Result: This will define a function moveForwardTwice that calls the move function twice. Finally, the robot will move forward two squares when moveForwardTwice is called. 
+Result: This will define a function moveForwardTwice that calls the move function twice. Finally, the robot will move forward two 
+squares when moveForwardTwice is called. 
 
 
 
@@ -169,7 +171,8 @@ Luckily, the Robot Master's recipe for determining this number is still availabl
 The readable part of the scroll reads: 
 
 @@@@@@@@@@@@ToDo: italic-text
-"There is a variable equal to 20. There is a second variable initially equal to four times the first one. The robot must travel the product of the two variables minus the second variable."  
+"There is a variable equal to 20. There is a second variable initially equal to four times the first one. The robot must travel the product 
+of the two variables minus the second variable."  
 
 It is important to keep in mind that Wasm uses a stack structure for variables and function calls. 
 

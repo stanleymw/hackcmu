@@ -1,0 +1,10 @@
+(module
+  (import "builtin" "move" (func $move))
+
+  (func $move_fn
+    call $move
+  )
+
+  ;; Run the function $moveFn by name
+  (start $moveFn)
+)
