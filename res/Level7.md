@@ -4,9 +4,8 @@ Congratulations Wasm Master! You have reached the final level! To celebrate, the
 
 However, the robot does not know how to move in this manner, and needs your help!
 
-**Task:** Using the functions moveNForward and TurnLeft, and loops as needed, have the robot move in an interesting quasi-spiral pattern with the outer dimension being 32. 
-The robot should move 32 squares up (its starting orientation is upwards), turn left, move 31 squares leftwards, turn left again, move 30 squares down, and continue in 
-this fashion until it forward just one square.  
+**Task:** Using the functions moveNForward and TurnLeft, and loops as needed, have the robot move in an interesting quasi-spiral pattern with the outer dimension being 9 squares. 
+The robot should move 8 squares up (its starting orientation is upwards), turn left, move 7 squares leftwards, turn left again, move 6 squares down, and continue in this fashion until it moves forward just one square.  
 
 **Hint:** At every iteration of the robot's motion, what operations occur? 
 

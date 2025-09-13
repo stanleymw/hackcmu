@@ -5,7 +5,7 @@ The Great Invisible Monster of Wasm painted over part of the Robot Master's scro
 Luckily, the Robot Master's recipe for determining this number is still available. 
 The readable part of the scroll reads: 
 
-*"There is a variable equal to 20. There is a second variable initially equal to four times the first one. The robot must travel the product of the two variables minus the second variable."*  
+*"There is a variable equal to 6. There is a second variable initially equal to twice times the first one. The robot must travel the product of the two variables minus 22."*  
 
 It is important to keep in mind that Wasm uses a stack structure for variables and function calls. 
 
