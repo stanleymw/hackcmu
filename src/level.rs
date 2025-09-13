@@ -65,7 +65,7 @@ pub fn create_level_entitites(mut commands: Commands, asset_server: Res<AssetSer
         LevelTexture(asset_server.load("Map2.png")),
         WinPosition(GamePosition {
             x: -1,
-            y: 6,
+            y: -7,
             rot: GameDirection::South,
         }),
     ));
