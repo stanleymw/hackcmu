@@ -53,7 +53,11 @@ pub fn code_editor(
                 });
             }
 
-            if ui.button("▶Execute").clicked() { }
+            if ui.button("▶ Play").clicked() {
+                // egui::Popup::new(id, ctx, anchor, layer_id)
+             }
+            if ui.button("⏸ Pause").clicked() { }
+            if ui.button("↩ Reset").clicked() { }
 
             for (mut buf, idx) in level_query.iter_mut() {
                 if idx.0 != current_level.index {
@@ -76,7 +80,7 @@ pub fn code_editor(
                 ui.add(
                     TextEdit::multiline(&mut buf.code)
                         .code_editor()
-                        .layouter(&mut layouter).min_size(Vec2{x: 64.0, y: 512.0}),
+                        .layouter(&mut layouter).min_size(Vec2{x: 64.0, y: 324.0}),
                 );
             }
 
