@@ -1,4 +1,5 @@
-use bevy::prelude::*;
+use bevy::{platform::collections::HashSet, prelude::*};
+use wasmtime::{Module, Store};
 
 use crate::game::{GamePositionDelta, GameTurn};
 
@@ -11,6 +12,16 @@ impl Plugin for WasmPlugin {
 #[derive(Component)]
 pub struct CodeBuffer {
     pub code: String,
+    pub compiled: Option<CompiledCode>,
+}
+
+pub struct CompiledCode {
+    module: Module,
+    store: Store<WasmContext>,
+}
+
+pub struct WasmContext {
+    callbacks: HashSet<WasmCallbacks>,
 }
 
 pub enum WasmCallbacks {
@@ -32,9 +43,9 @@ impl WasmCallbacks {
             }
             WasmCallbacks::TurnRight => {
                 cmds.send_event(GamePositionDelta {
-                    x: 1,
+                    x: 0,
                     y: 0,
-                    rot: GameTurn::Straight,
+                    rot: GameTurn::Right,
                 });
             }
         }

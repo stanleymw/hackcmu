@@ -8,3 +8,4 @@ bevy = { version = "0.16.1", features = ["dynamic_linking"] }
 bevy_egui = "0.36.0"
 egui_extras = {version = "0.32.3", features = ["syntect"]}
 syntect = "5.2.0"
+wasmtime = "36.0.2"
