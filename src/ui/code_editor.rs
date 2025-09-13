@@ -1,10 +1,18 @@
 use bevy::prelude::*;
 use bevy_egui::{
-    egui::{self, vec2, Style, TextEdit, Vec2}, EguiContexts
+    EguiContexts,
+    egui::{self, Style, TextEdit, Vec2, vec2},
 };
 use egui_extras::syntax_highlighting::{CodeTheme, SyntectSettings};
 
-use crate::{ui::{reference::ReferenceOpen, settings::{self, SettingsOpen}}, wasm::CodeBuffer, CurrentLevel, LevelIndex};
+use crate::{
+    CurrentLevel, LevelIndex,
+    ui::{
+        reference::ReferenceOpen,
+        settings::{self, SettingsOpen},
+    },
+    wasm::{CodeAction, CodeBuffer},
+};
 
 #[derive(Resource)]
 pub struct SyntectSetting {
@@ -15,11 +23,10 @@ pub struct SyntectSetting {
 //     fn default() -> Self {
 //         return Self {
 //             dark_mode: true,
-//             syntect_theme: 
+//             syntect_theme:
 //         };
 //     }
 // }
-
 
 #[derive(Resource)]
 pub struct EditorTheme(pub CodeTheme);
@@ -34,6 +41,7 @@ pub fn code_editor(
     mut level_query: Query<(&mut CodeBuffer, &LevelIndex)>,
     mut settings_window_open: ResMut<SettingsOpen>,
     mut reference_window_open: ResMut<ReferenceOpen>,
+    mut code_actions: EventWriter<CodeAction>,
 ) -> Result {
     egui::Window::new(format!("Level {}", current_level.index))
         .id("Level UI".into())
@@ -54,10 +62,14 @@ pub fn code_editor(
             }
 
             if ui.button("▶ Play").clicked() {
-                // egui::Popup::new(id, ctx, anchor, layer_id)
-             }
-            if ui.button("⏸ Pause").clicked() { }
-            if ui.button("↩ Reset").clicked() { }
+                code_actions.write(CodeAction::CompileAndRun);
+            }
+            if ui.button("⏸ Pause").clicked() {
+                code_actions.write(CodeAction::Pause);
+            }
+            if ui.button("↩ Reset").clicked() {
+                code_actions.write(CodeAction::Stop);
+            }
 
             for (mut buf, idx) in level_query.iter_mut() {
                 if idx.0 != current_level.index {
@@ -80,7 +92,8 @@ pub fn code_editor(
                 ui.add(
                     TextEdit::multiline(&mut buf.code)
                         .code_editor()
-                        .layouter(&mut layouter).min_size(Vec2{x: 64.0, y: 324.0}),
+                        .layouter(&mut layouter)
+                        .min_size(Vec2 { x: 64.0, y: 324.0 }),
                 );
             }
 
@@ -89,3 +102,4 @@ pub fn code_editor(
 
     Ok(())
 }
+
