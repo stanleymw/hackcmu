@@ -29,6 +29,8 @@ pub fn win_screen(
 ) -> Result {
     if has_won.0 {
         egui::Window::new("You Win!")
+            .resizable(false)
+            .collapsible(false)
             .anchor(Align2::CENTER_CENTER, emath::vec2(0.0, 0.0))
             .show(contexts.ctx_mut()?, |ui| {
                 if ui.button("Next Level").clicked() {
