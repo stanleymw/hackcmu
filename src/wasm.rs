@@ -95,9 +95,9 @@ fn invalidate_on_code_change(
         if buf.code == task.code_compiled {
             continue;
         }
+        println!("Aborted due to code change");
 
         if let Some(ch) = ch {
-            println!("Aborted due to code change");
             let _ = ch.to_wasm.unbounded_send(WasmEventsIn::Abort);
         }
         cmds.entity(entity).remove::<WasmChannels>();
@@ -166,11 +166,17 @@ fn handle_code_action(
                 }
             }
             CodeAction::Pause => {
-                *game_state = GameState::Pause;
+                if *game_state == GameState::Run {
+                    *game_state = GameState::Pause;
+                } else {
+                    *game_state = GameState::Run;
+                }
             }
             CodeAction::Stop => {
                 reset_event.write(GameResetEvent);
                 *game_state = GameState::Pause;
+
+                println!("Aborted due to stop");
 
                 if let Some(channels) = channels {
                     let _ = channels.to_wasm.unbounded_send(WasmEventsIn::Abort);

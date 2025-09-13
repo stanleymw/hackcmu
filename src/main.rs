@@ -1,4 +1,5 @@
 use bevy::{ecs::query, prelude::*};
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
 pub mod game;
 pub mod render3d;
@@ -13,6 +14,7 @@ fn main() {
             game::GamePlugin,
             wasm::WasmPlugin,
             render3d::Render3dPlugin,
+            WorldInspectorPlugin::new(),
         ))
         .insert_resource(CurrentLevel { index: 0 })
         .add_systems(Update, update_is_current_level)

@@ -8,7 +8,11 @@ impl Plugin for GamePlugin {
             .add_event::<GameResetEvent>()
             .add_systems(
                 Update,
-                (animate_position, read_position_deltas, handle_reset),
+                (
+                    animate_position,
+                    read_position_deltas.after(handle_reset),
+                    handle_reset,
+                ),
             )
             .init_resource::<GameState>();
     }
@@ -52,16 +56,24 @@ fn read_position_deltas(
 }
 
 // TODO: Implement
-fn handle_reset(mut events: EventReader<GameResetEvent>) {
-    for event in events.read() {
-        // todo!("Game reset logic");
+fn handle_reset(
+    mut cmds: Commands,
+    mut events: EventReader<GameResetEvent>,
+    query: Query<Entity, (With<Robot>, With<GamePosition>)>,
+) {
+    for _event in events.read() {
+        println!("Game reset logic");
+
+        for entity in query {
+            cmds.entity(entity).insert(GamePosition::default());
+        }
     }
 }
 
 #[derive(Event)]
 pub struct GameResetEvent;
 
-#[derive(Resource, Default)]
+#[derive(Resource, Default, PartialEq, Eq)]
 pub enum GameState {
     Run,
     #[default]
