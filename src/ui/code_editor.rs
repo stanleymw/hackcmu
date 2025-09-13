@@ -102,6 +102,10 @@ pub fn code_editor(
                     continue;
                 }
 
+                if ui.button("Show Solution").clicked() {
+                    buf.code = buf.solution.clone();
+                }
+
                 let mut layouter = |ui: &egui::Ui, buf: &dyn egui::TextBuffer, wrap_width: f32| {
                     let mut layout_job: egui::text::LayoutJob =
                         egui_extras::syntax_highlighting::highlight_with(

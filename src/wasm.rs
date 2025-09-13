@@ -267,6 +267,7 @@ pub struct WasmCompileError {
 #[derive(Reflect, Component)]
 pub struct CodeBuffer {
     pub code: String,
+    pub solution: String,
     pub reference: String,
 }
 

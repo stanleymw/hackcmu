@@ -82,7 +82,7 @@ fn handle_reset(
 fn win_condition(
     mut has_won: ResMut<HasWon>,
     win_pos: Query<&WinPosition, With<IsCurrentLevel>>,
-    robot_pos: Single<&GamePosition, With<Robot>>,
+    robot_pos: Single<&GamePosition, (With<Robot>, Changed<GamePosition>)>,
 ) {
     let Ok(win_pos) = win_pos.single() else {
         return;
