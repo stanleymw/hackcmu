@@ -9,3 +9,10 @@ bevy_egui = "0.36.0"
 egui_extras = {version = "0.32.3", features = ["syntect"]}
 syntect = "5.2.0"
 wasmtime = "36.0.2"
+
+[profile.web]
+inherits = "release"
+lto = true
+codegen-units = 1    # bevy = { version = "0.12", default-features = false, features = ["animation", "bevy_asset", "bevy_gilrs", "bevy_scene", "bevy_winit", "bevy_core_pipeline", "bevy_pbr", "bevy_gltf", "bevy_render", "multi-threaded", "filesystem_watcher", "wayland", "webgl2", "tonemapping_luts", "ktx2", "zstd", "default_font", "dynamic_linking"] }
+opt-level = 's'
+debug = false
