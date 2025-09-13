@@ -8,6 +8,7 @@ use bevy::{
 
 use crate::{
     LevelIndex,
+    game::{GameDirection, GamePosition, WinPosition},
     render3d::LevelTexture,
     wasm::{AvaibleCallbacks, CodeBuffer, WasmCallback},
 };
@@ -26,6 +27,11 @@ pub fn create_level_entitites(mut commands: Commands, asset_server: Res<AssetSer
         },
         LevelIndex(0),
         LevelTexture(asset_server.load("Map0.png")),
+        WinPosition(GamePosition {
+            x: 3,
+            y: 0,
+            rot: GameDirection::North,
+        }),
     ));
 
     commands.spawn((
@@ -39,6 +45,11 @@ pub fn create_level_entitites(mut commands: Commands, asset_server: Res<AssetSer
         },
         LevelIndex(1),
         LevelTexture(asset_server.load("Map1.png")),
+        WinPosition(GamePosition {
+            x: 3,
+            y: 2,
+            rot: GameDirection::East,
+        }),
     ));
 
     commands.spawn((
@@ -52,6 +63,11 @@ pub fn create_level_entitites(mut commands: Commands, asset_server: Res<AssetSer
         },
         LevelIndex(2),
         LevelTexture(asset_server.load("Map2.png")),
+        WinPosition(GamePosition {
+            x: -1,
+            y: 6,
+            rot: GameDirection::South,
+        }),
     ));
 
     commands.spawn((

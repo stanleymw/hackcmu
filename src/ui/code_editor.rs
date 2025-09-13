@@ -6,7 +6,7 @@ use bevy_egui::{
 use egui_extras::syntax_highlighting::CodeTheme;
 
 use crate::{
-    CurrentLevel, HasWon, LevelIndex,
+    CurrentLevel, HasWon, LevelIndex, ShowDebugger,
     game::GameState,
     ui::{reference::ReferenceOpen, settings::SettingsOpen},
     wasm::{CodeAction, CodeBuffer, WasmCompileError},
@@ -40,6 +40,7 @@ pub fn code_editor(
     mut level_query: Query<(&mut CodeBuffer, &LevelIndex)>,
     mut settings_window_open: ResMut<SettingsOpen>,
     mut reference_window_open: ResMut<ReferenceOpen>,
+    mut inspector_window_open: ResMut<ShowDebugger>,
     mut code_actions: EventWriter<CodeAction>,
     mut has_won: ResMut<HasWon>,
     mut compile_error_reader: EventReader<WasmCompileError>,
@@ -55,6 +56,7 @@ pub fn code_editor(
             ui.horizontal(|ui| {
                 ui.checkbox(&mut settings_window_open.0, "Settings");
                 ui.checkbox(&mut reference_window_open.0, "Reference");
+                ui.checkbox(&mut inspector_window_open.0, "Debugger");
             });
 
             ui.label(RichText::new(&last_compile_error.error).font(FontId::monospace(16.0)));

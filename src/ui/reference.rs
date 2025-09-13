@@ -1,7 +1,10 @@
-use bevy::ecs::{
-    error::Result,
-    resource::Resource,
-    system::{Local, Query, Res, ResMut},
+use bevy::{
+    ecs::{
+        error::Result,
+        resource::Resource,
+        system::{Local, Query, Res, ResMut},
+    },
+    reflect::Reflect,
 };
 use bevy_egui::{
     EguiContexts,

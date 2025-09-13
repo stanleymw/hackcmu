@@ -17,7 +17,13 @@ impl Plugin for GamePlugin {
                     win_condition,
                 ),
             )
-            .init_resource::<GameState>();
+            .init_resource::<GameState>()
+            .register_type::<WinPosition>()
+            .register_type::<GameResetEvent>()
+            .register_type::<GameState>()
+            .register_type::<GamePosition>()
+            .register_type::<GameDirection>()
+            .register_type::<GameTurn>();
     }
 }
 
@@ -87,32 +93,32 @@ fn win_condition(
     }
 }
 
-#[derive(Component)]
+#[derive(Reflect, Component)]
 pub struct WinPosition(pub GamePosition);
 
-#[derive(Event)]
+#[derive(Reflect, Event)]
 pub struct GameResetEvent;
 
-#[derive(Resource, Default, PartialEq, Eq)]
+#[derive(Reflect, Resource, Default, PartialEq, Eq)]
 pub enum GameState {
     Run,
     #[default]
     Pause,
 }
 
-#[derive(Component)]
+#[derive(Reflect, Component)]
 // TODO: Add more here?
 #[require(GamePosition, Transform)]
 pub struct Robot;
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Component, Debug, Default)]
+#[derive(Reflect, Clone, Copy, PartialEq, Eq, Hash, Component, Debug, Default)]
 pub struct GamePosition {
     pub x: i32,
     pub y: i32,
     pub rot: GameDirection,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Event, Debug)]
+#[derive(Reflect, Clone, Copy, PartialEq, Eq, Hash, Event, Debug)]
 pub struct GamePositionDelta {
     pub x: i32,
     pub y: i32,
@@ -152,8 +158,8 @@ impl GamePositionDelta {
                 rot: self.rot,
             },
             GameDirection::East => GamePositionDelta {
-                x: self.y,
-                y: -self.x,
+                x: -self.y,
+                y: self.x,
                 rot: self.rot,
             },
             GameDirection::South => GamePositionDelta {
@@ -162,15 +168,15 @@ impl GamePositionDelta {
                 rot: self.rot,
             },
             GameDirection::West => GamePositionDelta {
-                x: -self.y,
-                y: self.x,
+                x: self.y,
+                y: -self.x,
                 rot: self.rot,
             },
         }
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Default)]
+#[derive(Reflect, Clone, Copy, PartialEq, Eq, Hash, Debug, Default)]
 pub enum GameDirection {
     #[default]
     North,
@@ -208,14 +214,14 @@ impl From<&GameDirection> for Quat {
     fn from(value: &GameDirection) -> Self {
         match value {
             GameDirection::North => Quat::from_rotation_y(0.0f32.to_radians()),
-            GameDirection::East => Quat::from_rotation_y(90.0f32.to_radians()),
-            GameDirection::South => Quat::from_rotation_y(180.0f32.to_radians()),
-            GameDirection::West => Quat::from_rotation_y(270.0f32.to_radians()),
+            GameDirection::East => Quat::from_rotation_y(-90.0f32.to_radians()),
+            GameDirection::South => Quat::from_rotation_y(-180.0f32.to_radians()),
+            GameDirection::West => Quat::from_rotation_y(-270.0f32.to_radians()),
         }
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+#[derive(Reflect, Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum GameTurn {
     Straight,
     Right,
@@ -226,8 +232,8 @@ impl GameTurn {
     fn to_deg(&self) -> u32 {
         match self {
             GameTurn::Straight => 0,
-            GameTurn::Right => 270,
-            GameTurn::Left => 90,
+            GameTurn::Right => 90,
+            GameTurn::Left => 270,
         }
     }
 }

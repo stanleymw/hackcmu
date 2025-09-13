@@ -12,15 +12,17 @@ impl Plugin for Render3dPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup)
             .add_systems(Update, swap_level_texture)
-            .add_plugins(PanOrbitCameraPlugin);
+            .add_plugins(PanOrbitCameraPlugin)
+            .register_type::<LevelTexture>()
+            .register_type::<FloorMarker>();
     }
 }
 
-#[derive(Component)]
+#[derive(Reflect, Component)]
 pub struct LevelTexture(pub Handle<Image>);
 
-#[derive(Component)]
-pub struct FloowMarker;
+#[derive(Reflect, Component)]
+pub struct FloorMarker;
 
 /// set up a simple 3D scene
 fn setup(
@@ -40,7 +42,8 @@ fn setup(
         })),
         Transform::from_translation(vec3(0.0, -0.5, 0.0))
             .with_rotation(Quat::from_rotation_y(-90.0f32.to_radians())),
-        FloowMarker,
+        FloorMarker,
+        Name::new("Floor"),
     ));
     // cube
     commands
@@ -50,6 +53,7 @@ fn setup(
             Transform::from_xyz(0.0, 0.0, 0.0),
             Robot,
             GamePosition::default(),
+            Name::new("Robot"),
         ))
         .with_children(|ctx| {
             ctx.spawn((
@@ -95,18 +99,20 @@ fn setup(
             ..default()
         },
         Transform::from_xyz(4.0, 8.0, 4.0),
+        Name::new("Light"),
     ));
     // camera
     commands.spawn((
         Camera3d::default(),
         Transform::from_xyz(-2.5, 4.5, 9.0).looking_at(Vec3::ZERO, Vec3::Y),
         PanOrbitCamera::default(),
+        Name::new("Camera"),
     ));
 }
 
 fn swap_level_texture(
     mut cmds: Commands,
-    floor: Single<Entity, With<FloowMarker>>,
+    floor: Single<Entity, With<FloorMarker>>,
     query: Query<&LevelTexture, Added<IsCurrentLevel>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {

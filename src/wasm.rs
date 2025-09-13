@@ -45,7 +45,15 @@ impl Plugin for WasmPlugin {
                     kill_old_levels,
                     resume_timer,
                 ),
-            );
+            )
+            .register_type::<ResumeTimerRes>()
+            .register_type::<CodeBuffer>()
+            .register_type::<CodeAction>()
+            .register_type::<WasmEventsOut>()
+            .register_type::<WasmEventsIn>()
+            .register_type::<WasmCompileError>()
+            .register_type::<AvaibleCallbacks>()
+            .register_type::<WasmCallback>();
     }
 }
 
@@ -226,37 +234,37 @@ fn kill_old_levels(
     }
 }
 
-#[derive(Resource)]
+#[derive(Reflect, Resource)]
 pub struct ResumeTimerRes(Timer);
 
 #[derive(Resource)]
 pub struct EngineRes(Engine);
 
-#[derive(Event)]
+#[derive(Reflect, Event)]
 pub enum CodeAction {
     CompileAndRun,
     Pause,
     Stop,
 }
 
-#[derive(Event)]
+#[derive(Reflect, Event)]
 pub enum WasmEventsOut {
     Delta(GamePositionDelta),
     IsFinished,
 }
 
-#[derive(Event)]
+#[derive(Reflect, Event)]
 pub enum WasmEventsIn {
     Resume,
     Abort,
 }
 
-#[derive(Event, Default, Clone)]
+#[derive(Reflect, Event, Default, Clone)]
 pub struct WasmCompileError {
     pub error: String,
 }
 
-#[derive(Component)]
+#[derive(Reflect, Component)]
 pub struct CodeBuffer {
     pub code: String,
     pub reference: String,
@@ -271,7 +279,7 @@ pub struct CompiledCode {
     instance: Option<Instance>,
 }
 
-#[derive(Component, Default)]
+#[derive(Reflect, Component, Default)]
 pub struct AvaibleCallbacks {
     pub callbacks: HashSet<WasmCallback>,
 }
@@ -296,7 +304,7 @@ pub struct WasmTask {
     finished: bool,
 }
 
-#[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
+#[derive(Reflect, PartialEq, Eq, Hash, Clone, Copy, Debug)]
 pub enum WasmCallback {
     Move,
     TurnRight,
