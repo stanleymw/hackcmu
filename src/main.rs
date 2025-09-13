@@ -18,6 +18,7 @@ fn main() {
             WorldInspectorPlugin::new(),
         ))
         .insert_resource(CurrentLevel { index: 0 })
+        .insert_resource(HasWon(false))
         .add_systems(Update, update_is_current_level)
         .run();
 }
@@ -30,6 +31,9 @@ struct LevelIndex(u8);
 struct CurrentLevel {
     index: u8,
 }
+
+#[derive(Resource)]
+struct HasWon(pub bool);
 
 #[derive(Component)]
 struct IsCurrentLevel;

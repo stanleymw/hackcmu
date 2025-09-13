@@ -12,7 +12,7 @@ use crate::{
 pub mod code_editor;
 pub mod reference;
 pub mod settings;
-
+pub mod win_screen;
 pub struct UiPlugin;
 
 impl Plugin for UiPlugin {
@@ -35,6 +35,7 @@ impl Plugin for UiPlugin {
                     code_editor::code_editor,
                     settings::settings_ui,
                     reference::reference_ui,
+                    win_screen::win_screen,
                 ),
             )
             .insert_resource(code_editor::SyntectSetting {

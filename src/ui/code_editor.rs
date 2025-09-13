@@ -1,16 +1,13 @@
 use bevy::prelude::*;
 use bevy_egui::{
     EguiContexts,
-    egui::{self, FontId, RichText, ScrollArea, Style, TextEdit, TextStyle, Vec2, vec2},
+    egui::{self, FontId, RichText, Style, TextEdit, Vec2},
 };
-use egui_extras::syntax_highlighting::{CodeTheme, SyntectSettings};
+use egui_extras::syntax_highlighting::CodeTheme;
 
 use crate::{
-    CurrentLevel, LevelIndex,
-    ui::{
-        reference::ReferenceOpen,
-        settings::{self, SettingsOpen},
-    },
+    CurrentLevel, HasWon, LevelIndex,
+    ui::{reference::ReferenceOpen, settings::SettingsOpen},
     wasm::{CodeAction, CodeBuffer, WasmCompileError},
 };
 
@@ -42,12 +39,14 @@ pub fn code_editor(
     mut settings_window_open: ResMut<SettingsOpen>,
     mut reference_window_open: ResMut<ReferenceOpen>,
     mut code_actions: EventWriter<CodeAction>,
+    mut has_won: ResMut<HasWon>,
     mut compile_error_reader: EventReader<WasmCompileError>,
     mut last_compile_error: Local<(WasmCompileError)>,
 ) -> Result {
     for compileError in compile_error_reader.read() {
         *last_compile_error = compileError.clone();
     }
+
     egui::Window::new(format!("Level {}", current_level.index))
         .id("Level UI".into())
         .show(contexts.ctx_mut()?, |ui| {
@@ -59,18 +58,19 @@ pub fn code_editor(
             ui.label(RichText::new(&last_compile_error.error).font(FontId::monospace(16.0)));
 
             if ui.button("Next Level").clicked() {
-                commands.insert_resource(CurrentLevel {
-                    index: current_level.index.wrapping_add(1),
-                });
+                // commands.insert_resource(CurrentLevel {
+                //     index: current_level.index.wrapping_add(1),
+                // });
+                has_won.0 = true;
                 last_compile_error.error = String::new();
             }
 
-            if ui.button("Previous Level").clicked() {
-                commands.insert_resource(CurrentLevel {
-                    index: current_level.index.wrapping_sub(1),
-                });
-                last_compile_error.error = String::new();
-            }
+            // if ui.button("Previous Level").clicked() {
+            //     commands.insert_resource(CurrentLevel {
+            //         index: current_level.index.wrapping_sub(1),
+            //     });
+            //     last_compile_error.error = String::new();
+            // }
 
             ui.horizontal(|ui| {
                 if ui.button("▶ Play").clicked() {
