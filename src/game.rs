@@ -43,6 +43,8 @@ fn read_position_deltas(
     mut query: Query<&mut GamePosition, With<Robot>>,
 ) {
     for delta in events.read() {
+        println!("Got Delta: {delta:?}");
+
         for mut pos in query.iter_mut() {
             *pos = pos.shift_by(*delta);
         }
@@ -103,8 +105,8 @@ impl From<&GamePosition> for Transform {
 
         Transform::from_rotation(quat).with_translation(Vec3::new(
             value.x as f32,
-            value.y as f32,
             0.0,
+            value.y as f32,
         ))
     }
 }
@@ -192,8 +194,8 @@ impl GameTurn {
     fn to_deg(&self) -> u32 {
         match self {
             GameTurn::Straight => 0,
-            GameTurn::Right => 90,
-            GameTurn::Left => 270,
+            GameTurn::Right => 270,
+            GameTurn::Left => 90,
         }
     }
 }
