@@ -13,7 +13,6 @@
     (local.get $var2)  
     i32.add
 
-
     drop    ;; remove the last portion 
   )
   

@@ -2,9 +2,9 @@
   (import "builtin" "move" (func $move))
   (import "builtin" "turn_right" (func $turn_right))
 
-  (func $move_fn
+  (func $main
     call $move
   )
  
-  (start $move_fn)
+  (start $main)
 )
