@@ -25,8 +25,8 @@
     )
 
     (func $main
-        i32.const 40
-        call $moveNTimes  ;; will consume the value 255 from the stack
+        i32.const 16
+        call $moveNTimes  ;; will consume the value 16 from the stack
     )
     
     (start $main)

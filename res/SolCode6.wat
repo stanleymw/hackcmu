@@ -25,9 +25,9 @@
     )
     
     (func $main
-        ;; Take shortcuts; value = 1520
-        i32.const 1520
-        call $moveNTimes  ;; will consume the value 255 from the stack
+        ;; Take shortcuts; value = 50
+        i32.const 50
+        call $moveNTimes  ;; will consume the value 50
     )
     
     (start $main)
