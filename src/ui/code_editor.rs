@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_egui::{
     EguiContexts,
-    egui::{self, ScrollArea, Style, TextEdit, Vec2, vec2},
+    egui::{self, FontId, RichText, ScrollArea, Style, TextEdit, TextStyle, Vec2, vec2},
 };
 use egui_extras::syntax_highlighting::{CodeTheme, SyntectSettings};
 
@@ -11,7 +11,7 @@ use crate::{
         reference::ReferenceOpen,
         settings::{self, SettingsOpen},
     },
-    wasm::{CodeAction, CodeBuffer},
+    wasm::{CodeAction, CodeBuffer, WasmCompileError},
 };
 
 #[derive(Resource)]
@@ -42,7 +42,12 @@ pub fn code_editor(
     mut settings_window_open: ResMut<SettingsOpen>,
     mut reference_window_open: ResMut<ReferenceOpen>,
     mut code_actions: EventWriter<CodeAction>,
+    mut compile_error_reader: EventReader<WasmCompileError>,
+    mut last_compile_error: Local<(WasmCompileError)>,
 ) -> Result {
+    for compileError in compile_error_reader.read() {
+        *last_compile_error = compileError.clone();
+    }
     egui::Window::new(format!("Level {}", current_level.index))
         .id("Level UI".into())
         .show(contexts.ctx_mut()?, |ui| {
@@ -50,6 +55,8 @@ pub fn code_editor(
                 ui.checkbox(&mut settings_window_open.0, "Settings");
                 ui.checkbox(&mut reference_window_open.0, "Reference");
             });
+
+            ui.label(RichText::new(&last_compile_error.error).font(FontId::monospace(16.0)));
 
             if ui.button("Next Level").clicked() {
                 commands.insert_resource(CurrentLevel {

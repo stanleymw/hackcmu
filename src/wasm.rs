@@ -232,9 +232,9 @@ pub enum WasmEventsIn {
     Abort,
 }
 
-#[derive(Event)]
+#[derive(Event, Default, Clone)]
 pub struct WasmCompileError {
-    error: String,
+    pub error: String,
 }
 
 #[derive(Component)]
