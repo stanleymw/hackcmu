@@ -19,7 +19,7 @@ fn animate_position(
     time: Res<Time>,
 ) {
     // Decay rate of ln(10) => after 1 second, remaining distance is 1/10th
-    let decay_rate = f32::ln(10.0);
+    let decay_rate = 10.0;
 
     for (mut transform, position) in query.iter_mut() {
         let goal: Transform = position.into();

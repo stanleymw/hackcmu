@@ -50,7 +50,7 @@ fn setup_camera_system(mut commands: Commands) {
 
     commands.spawn((
         CodeBuffer {
-            code: include_str!("../res/SolCode1.wat").to_owned(),
+            code: include_str!("../res/Level1Init.wat").to_owned(),
         },
         AvaibleCallbacks {
             callbacks: [WasmCallback::Move].into(),

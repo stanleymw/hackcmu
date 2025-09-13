@@ -89,10 +89,15 @@ fn resume_timer(
 
 fn invalidate_on_code_change(
     mut cmds: Commands,
-    query: Query<(Entity, Option<&WasmChannels>), Changed<CodeBuffer>>,
+    query: Query<(Entity, &CodeBuffer, &WasmTask, Option<&WasmChannels>)>,
 ) {
-    for (entity, ch) in query.iter() {
+    for (entity, buf, task, ch) in query.iter() {
+        if buf.code == task.code_compiled {
+            continue;
+        }
+
         if let Some(ch) = ch {
+            println!("Aborted due to code change");
             let _ = ch.to_wasm.unbounded_send(WasmEventsIn::Abort);
         }
         cmds.entity(entity).remove::<WasmChannels>();
@@ -143,6 +148,7 @@ fn handle_code_action(
                             WasmTask {
                                 task,
                                 finished: false,
+                                code_compiled: buf.code.clone(),
                             },
                             channels,
                         ));
@@ -205,6 +211,7 @@ fn kill_old_levels(
         let Some(_) = task else { continue };
 
         if let Some(ch) = ch {
+            println!("Killed old level");
             let _ = ch.to_wasm.unbounded_send(WasmEventsIn::Abort);
         }
 
@@ -278,6 +285,7 @@ pub struct WasmChannels {
 #[derive(Component)]
 pub struct WasmTask {
     task: Task<anyhow::Result<()>>,
+    code_compiled: String,
     finished: bool,
 }
 
