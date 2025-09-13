@@ -27,6 +27,7 @@ impl Plugin for WasmPlugin {
 
         app.add_event::<WasmEventsIn>()
             .add_event::<WasmEventsOut>()
+            .add_event::<WasmCompileError>()
             .add_event::<CodeAction>()
             .insert_resource(EngineRes(engine))
             .insert_resource(ResumeTimerRes(Timer::new(
@@ -104,6 +105,7 @@ fn handle_code_action(
     mut game_state: ResMut<GameState>,
     mut events: EventReader<CodeAction>,
     mut reset_event: EventWriter<GameResetEvent>,
+    mut error_events: EventWriter<WasmCompileError>,
     code: Single<
         (
             Entity,
@@ -126,22 +128,30 @@ fn handle_code_action(
                     let _ = channels.to_wasm.unbounded_send(WasmEventsIn::Abort);
                 }
 
-                let (mut compiled, channels) = compile_code(
+                let res = compile_code(
                     &buf.code,
                     callbacks.unwrap_or(&Default::default()),
                     &engine.0,
-                )?;
+                );
 
-                let thread_pool = AsyncComputeTaskPool::get();
-                let task = thread_pool.spawn(async move { compiled.instantiate().await });
-
-                cmds.entity(entity).insert((
-                    WasmTask {
-                        task,
-                        finished: false,
-                    },
-                    channels,
-                ));
+                match res {
+                    Ok((mut compiled, channels)) => {
+                        let thread_pool = AsyncComputeTaskPool::get();
+                        let task = thread_pool.spawn(async move { compiled.instantiate().await });
+                        cmds.entity(entity).insert((
+                            WasmTask {
+                                task,
+                                finished: false,
+                            },
+                            channels,
+                        ));
+                    }
+                    Err(err) => {
+                        error_events.write(WasmCompileError {
+                            error: format!("{err:?}"),
+                        });
+                    }
+                }
             }
             CodeAction::Pause => {
                 *game_state = GameState::Pause;
@@ -220,6 +230,11 @@ pub enum WasmEventsOut {
 pub enum WasmEventsIn {
     Resume,
     Abort,
+}
+
+#[derive(Event)]
+pub struct WasmCompileError {
+    error: String,
 }
 
 #[derive(Component)]
