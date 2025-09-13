@@ -5,9 +5,8 @@
     call $move
     call $move
     call $move
-    call $move
   )
 
-  ;; Run the function $moveFn by name
+  ;; Run the function $move_fn by name
   (start $move_fn)
 )

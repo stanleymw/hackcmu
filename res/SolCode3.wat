@@ -19,10 +19,17 @@
   (func $main
     call $move_fn
     call $move_fn
+    call $move_fn
+    call $move_fn
+    call $move_fn
+    call $move_fn
     call $turnLeft_fn
     call $move_fn
     call $move_fn
+    call $move_fn
+    call $move_fn
     call $turnRight_fn
+    call $move_fn
     call $move_fn
     call $move_fn
     call $turnRight_fn
@@ -34,10 +41,16 @@
     call $turnLeft_fn
     call $move_fn
     call $move_fn
+    call $move_fn
     call $turnRight_fn
     call $move_fn
     call $move_fn
+    call $move_fn
     call $turn_left
+    call $move_fn
+    call $move_fn
+    call $move_fn
+    call $move_fn
     call $move_fn
     call $move_fn
     call $move_fn

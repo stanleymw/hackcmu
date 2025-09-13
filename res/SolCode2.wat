@@ -4,16 +4,20 @@
 
   (func $move_fn
     call $move
-    call $move
   )
 
   (func $turnRight_fn
     call $turn_right
   )
+
+  (func $main
+    call $move_fn
+    call $move_fn
+    call $move_fn
+    call $turn_right
+    call $move_fn
+    call $move_fn
+  )
  
-  (start $move_fn)
-  (start $turnRight_fn)
-  (start $move_fn)
-  (start $turnRight_fn)
-  (start $move_fn)
+  (start $main)
 )
