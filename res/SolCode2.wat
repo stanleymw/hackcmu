@@ -8,7 +8,7 @@
   )
 
   (func $turnRight_fn
-    call turnRight
+    call $turnRight
   )
  
   (start $move_fn)

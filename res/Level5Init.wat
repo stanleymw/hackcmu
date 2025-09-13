@@ -5,7 +5,6 @@
     local.get input
     i32.const 1
     i32.add
-    ;; @@@@@@@@@@@@ToDo: print the incremented value of the input
   )
 
   (func $main 
