@@ -50,6 +50,7 @@
                 libxkbcommon
                 mold
                 trunk
+                wayland
               ];
             RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
             LD_LIBRARY_PATH = lib.makeLibraryPath [
@@ -60,6 +61,7 @@
               libxkbcommon
               udev
               alsa-lib
+              wayland
             ];
           };
       }

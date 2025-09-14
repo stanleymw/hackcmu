@@ -1,4 +1,4 @@
-use bevy::{ecs::system::command::insert_resource, prelude::*, ui::AvailableSpace};
+use bevy::{ecs::system::command::insert_resource, prelude::*};
 use bevy_egui::{EguiPlugin, EguiPrimaryContextPass};
 use egui_extras::syntax_highlighting::{CodeTheme, SyntectSettings};
 use syntect::parsing::SyntaxDefinition;

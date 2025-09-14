@@ -1,4 +1,4 @@
-use bevy::{ecs::query, prelude::*};
+use bevy::{ecs::query, prelude::*, window::PresentMode};
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
 pub mod game;
@@ -10,7 +10,16 @@ pub mod wasm;
 fn main() {
     App::new()
         .add_plugins((
-            DefaultPlugins.set(ImagePlugin::default_nearest()),
+            DefaultPlugins
+                .set(ImagePlugin::default_nearest())
+                .set(WindowPlugin {
+                    primary_window: Some(Window {
+                        present_mode: PresentMode::AutoNoVsync, // Reduces input lag.
+                        fit_canvas_to_parent: true,
+                        ..default()
+                    }),
+                    ..default()
+                }),
             ui::UiPlugin,
             game::GamePlugin,
             wasm::WasmPlugin,
